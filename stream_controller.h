@@ -10,9 +10,20 @@
 #include <time.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define DESIRED_FREQUENCY 754000000	        /* Tune frequency in Hz */
 #define BANDWIDTH 8    				        /* Bandwidth in Mhz */
+#define MODULE_NAME_SIZE 8					/* example DVB-T2 */
+
+typedef struct _Config
+{
+	uint32_t frequency;
+	uint32_t bandwidth;	/* Can be smaller... */
+	char module[MODULE_NAME_SIZE];
+	uint16_t programNumber;
+
+}InputConfig;
 
 /**
  * @brief Structure that defines stream controller error

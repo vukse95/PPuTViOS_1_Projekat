@@ -1,6 +1,7 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
 
+
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
 {
    char command[13];
@@ -27,8 +28,34 @@ static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
 
-int main()
+int configFileRead(char fileName[]);
+
+int main(int argc, char *argv[])
 {
+	char *ret;
+
+	/* parse input arguments */
+	if(argc < 2)
+	{
+		printf("\nInput ERROR, config file now found!\n\n");
+		printf("Usage: TV_App config_file\n");
+		return 0;
+	}
+	else
+	{	
+		ret = strchr(argv[1], '.');
+		if(strcmp(ret, ".ini") != 0)
+		{
+			printf("\nWrong configuration file type!!\n");
+			return 0;
+		}
+		else
+		{
+			/* TODO: Parse return value*/
+			configFileRead(argv[1]);
+		}
+	}
+
     /* initialize remote controller module */
     ERRORCHECK(remoteControllerInit());
     
@@ -92,3 +119,9 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 	}
 }
 
+int configFileRead(char fileName[])
+{
+
+	/* TODO: Read - parse file and fill structure in stram_controller.h */
+
+}

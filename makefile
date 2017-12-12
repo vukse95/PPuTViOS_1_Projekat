@@ -34,9 +34,9 @@ SRCS =  ./vezba_5.c
 SRCS += ./tables_parser.c ./remote_controller.c ./stream_controller.c
 
 parser_playback_sample:
-	$(CC) -o vezba_5 $(INCS) $(SRCS) $(CFLAGS) $(LIBS)
+	$(CC) -o TV_App $(INCS) $(SRCS) $(CFLAGS) $(LIBS)
     
 clean:
-	rm -f vezba_5
+	rm -f TV_App
 copy:
-	cp vezba_5 ../../ploca/
+	cp TV_App ../../ploca/
