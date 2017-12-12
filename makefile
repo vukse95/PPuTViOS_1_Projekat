@@ -8,7 +8,7 @@ LD=$(CC_PREFIX)ld
 SYSROOT=$(SDK_ROOTFS)
 GALOIS_INCLUDE=$(SDK_GALOIS)
 
-INCS =	-I./../../tdp_api
+INCS =	-I./../tdp_api
 INCS += -I./include/ 							\
 		-I$(SYSROOT)/usr/include/         \
 		-I$(GALOIS_INCLUDE)/Common/include/     \
@@ -16,7 +16,7 @@ INCS += -I./include/ 							\
 		-I$(GALOIS_INCLUDE)/OSAL/include/CPU1/	\
 		-I$(GALOIS_INCLUDE)/PE/Common/include/
 
-LIBS_PATH = -L./../../tdp_api
+LIBS_PATH = -L./../tdp_api
 
 LIBS_PATH += -L$(SYSROOT)/home/galois/lib/
 
@@ -38,3 +38,5 @@ parser_playback_sample:
     
 clean:
 	rm -f vezba_5
+copy:
+	cp vezba_5 ../../ploca/
