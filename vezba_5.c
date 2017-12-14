@@ -121,7 +121,73 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 
 int configFileRead(char fileName[])
 {
+	FILE *filePtr;
+	char *lineBuffer = NULL;
+    size_t bufferSize = 128;
+    ssize_t read;
+	char *subStringPtr;
+	uint8_t paramCounter = 0;	/* Can't have more than two parameters */
+	char paramName[10];
+	char paramValue[10];
 
-	/* TODO: Read - parse file and fill structure in stram_controller.h */
+	filePtr = fopen(fileName, "r");
+	
+	if(filePtr == NULL)
+	{
+		printf("\nERROR opening file %s\n", fileName);
+		return 0;
+	}
+	
+	lineBuffer = (char *)malloc(bufferSize * sizeof(char));
 
+	if(lineBuffer == NULL)
+	{
+		printf("\nERROR allocating memory!\n");
+		return 0;
+	}
+	/* getline bugs occasionally, replace! */
+	while((read = getline(&lineBuffer, &bufferSize, filePtr)) != -1) 
+	{
+ 		/* Check if first char is '#' thats is comment or empty line */
+		if(lineBuffer[0] != '#' && lineBuffer != '\0')
+		{	
+			subStringPtr = strtok(lineBuffer, "=");
+			paramCounter = 0;
+			while(subStringPtr != NULL)
+			{	
+				//printf("%s\n", subStringPtr);
+				if(paramCounter == 0)
+				{
+					strcpy(paramName, subStringPtr);
+				}
+				else if(paramCounter == 1)
+				{
+					strcpy(paramValue, subStringPtr);
+				}
+				else if(paramCounter > 1)
+				{
+					free(lineBuffer);
+					fclose(filePtr);
+					printf("\nERROR - More parameters than needed");
+					return 0;
+				}
+				subStringPtr = strtok(NULL, "=");
+				paramCounter++;				
+			}
+			/* TODO: Remove white space and '"' char */
+			/* TODO: Fill structure */
+					
+		}
+    }
+
+	free(lineBuffer);
+	fclose(filePtr);
 }
+
+
+
+
+
+
+
+
