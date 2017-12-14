@@ -122,14 +122,18 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 int configFileRead(char fileName[])
 {
 	FILE *filePtr;
-	char *lineBuffer = NULL;
+
+	char *fileLineBuffer[128];
+	char *lineBuffer;
     size_t bufferSize = 128;
     ssize_t read;
-	char *subStringPtr;
-	uint8_t paramCounter = 0;	/* Can't have more than two parameters */
+
 	char paramName[10];
 	char paramValue[10];
 
+	uint8_t paramValueCounter = 0;
+	
+	lineBuffer = &fileLineBuffer; 
 	filePtr = fopen(fileName, "r");
 	
 	if(filePtr == NULL)
@@ -138,7 +142,7 @@ int configFileRead(char fileName[])
 		return 0;
 	}
 	
-	lineBuffer = (char *)malloc(bufferSize * sizeof(char));
+	//lineBuffer = (char *)malloc(bufferSize * sizeof(char));
 
 	if(lineBuffer == NULL)
 	{
@@ -151,36 +155,39 @@ int configFileRead(char fileName[])
  		/* Check if first char is '#' thats is comment or empty line */
 		if(lineBuffer[0] != '#' && lineBuffer != '\0')
 		{	
-			subStringPtr = strtok(lineBuffer, "=");
-			paramCounter = 0;
-			while(subStringPtr != NULL)
-			{	
-				//printf("%s\n", subStringPtr);
-				if(paramCounter == 0)
-				{
-					strcpy(paramName, subStringPtr);
+			if(strstr(lineBuffer, "Module") != NULL)
+			{
+				printf("\n\nizlaz:%s", lineBuffer);
+				paramValueCounter = 0;
+				while(lineBuffer[paramValueCounter] != '"')
+				{	
+					paramValueCounter++;
 				}
-				else if(paramCounter == 1)
-				{
-					strcpy(paramValue, subStringPtr);
-				}
-				else if(paramCounter > 1)
-				{
-					free(lineBuffer);
-					fclose(filePtr);
-					printf("\nERROR - More parameters than needed");
-					return 0;
-				}
-				subStringPtr = strtok(NULL, "=");
-				paramCounter++;				
+				printf("\nparamCounter:%d", paramValueCounter);
 			}
-			/* TODO: Remove white space and '"' char */
-			/* TODO: Fill structure */
-					
+			else if(strstr(lineBuffer, "Bandwidth") != NULL)
+			{
+				printf("\n\nizlaz:%s", lineBuffer);
+
+			}
+			else if(strstr(lineBuffer, "Freq") != NULL)
+			{
+				printf("\n\nizlaz:%s", lineBuffer);
+			}
+			else if(strstr(lineBuffer, "ProgramNumber") != NULL)
+			{
+				printf("\n\nizlaz:%s", lineBuffer);
+			}
+			
+			
+			//printf("\nparamName:%s", paramName);
+			//printf("\nparamValue:%s", paramValue);
+			//printf("\n");
+				
 		}
     }
 
-	free(lineBuffer);
+	//free(lineBuffer);
 	fclose(filePtr);
 }
 
