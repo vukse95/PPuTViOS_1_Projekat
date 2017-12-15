@@ -125,17 +125,17 @@ int configFileRead(char fileName[])
 
 	char *fileLineBuffer[128];
 	char *lineBuffer;
-    size_t bufferSize = 128;
-    ssize_t read;
+	size_t bufferSize = 128;
+	ssize_t read;
 
 	char paramValue[10];
 	int paramValueInt = 0;
 
 	int paramValueCounter = 0;
-    int paramValueCounterAux = 0;
+	int paramValueCounterAux = 0;
 
-    /* Pointing to static array to avoid memory leak in case of */
-    /* premature closure of the program */
+	/* Pointing to static array to avoid memory leak in case of */
+	/* premature closure of the program */
 	lineBuffer = &fileLineBuffer;
 
 	filePtr = fopen(fileName, "r");
@@ -161,14 +161,14 @@ int configFileRead(char fileName[])
 					paramValueCounter++;
 				}
 				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-                paramValueInt = atoi(paramValue);
+				paramValueCounterAux = 0;
+				while(lineBuffer[paramValueCounter] != '"')
+				{
+					paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
+					paramValueCounter++;
+					paramValueCounterAux++;
+				}
+				paramValueInt = atoi(paramValue);
 				printf("\nParam Value[Freq]:%d", paramValueInt);
 			}
 			else if(strstr(lineBuffer, "Bandwidth") != NULL)
@@ -180,14 +180,14 @@ int configFileRead(char fileName[])
 					paramValueCounter++;
 				}
 				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-                paramValueInt = atoi(paramValue);
+				paramValueCounterAux = 0;
+				while(lineBuffer[paramValueCounter] != '"')
+				{
+					paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
+					paramValueCounter++;
+					paramValueCounterAux++;
+				}
+				paramValueInt = atoi(paramValue);
 				printf("\nParam Value[Bandwidth]:%d", paramValueInt);
 			}
 			else if(strstr(lineBuffer, "Module") != NULL)
@@ -199,13 +199,13 @@ int configFileRead(char fileName[])
 					paramValueCounter++;
 				}
 				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
+				paramValueCounterAux = 0;
+				while(lineBuffer[paramValueCounter] != '"')
+				{
+					paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
+					paramValueCounter++;
+					paramValueCounterAux++;
+				}
 				printf("\nParam Value[Module]:%s", paramValue);
 			}
 			else if(strstr(lineBuffer, "ProgramNumber") != NULL)
@@ -217,18 +217,18 @@ int configFileRead(char fileName[])
 					paramValueCounter++;
 				}
 				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-                paramValueInt = atoi(paramValue);
+				paramValueCounterAux = 0;
+				while(lineBuffer[paramValueCounter] != '"')
+				{
+					paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
+					paramValueCounter++;
+					paramValueCounterAux++;
+				}
+				paramValueInt = atoi(paramValue);
 				printf("\nParam Value[ProgramNumber]:%d", paramValueInt);
 			}
 		}
-    }
+	}
 
 	fclose(filePtr);
 }
