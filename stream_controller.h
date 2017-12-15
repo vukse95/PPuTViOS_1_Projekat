@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+/* Change ERROR message to be by structure not define */
 #define DESIRED_FREQUENCY 754000000	        /* Tune frequency in Hz */
 #define BANDWIDTH 8    				        /* Bandwidth in Mhz */
 #define MODULE_NAME_SIZE 8					/* example DVB-T2 */

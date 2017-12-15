@@ -39,6 +39,7 @@ StreamControllerError streamControllerInit(InputConfig inputConfig)
     }
 	
 	inputConfigFromApp = inputConfig;
+	programNumber = inputConfigFromApp.programNumber;
 
     return SC_NO_ERROR;
 }
