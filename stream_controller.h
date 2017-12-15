@@ -20,10 +20,10 @@ typedef struct _Config
 {
 	uint32_t frequency;
 	uint32_t bandwidth;	/* Can be smaller... */
-	char module[MODULE_NAME_SIZE];
+	t_Module module;	/* enum */
 	uint16_t programNumber;
-
 }InputConfig;
+
 
 /**
  * @brief Structure that defines stream controller error
@@ -50,7 +50,7 @@ typedef struct _ChannelInfo
  *
  * @return stream controller error code
  */
-StreamControllerError streamControllerInit();
+StreamControllerError streamControllerInit(InputConfig inputConfig);
 
 /**
  * @brief Deinitializes stream controller module

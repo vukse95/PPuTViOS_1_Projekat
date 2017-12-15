@@ -27,6 +27,7 @@ static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t valu
 static pthread_cond_t deinitCond = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t deinitMutex = PTHREAD_MUTEX_INITIALIZER;
 static ChannelInfo channelInfo;
+static InputConfig configInputConfig;
 
 int configFileRead(char fileName[]);
 
@@ -51,7 +52,6 @@ int main(int argc, char *argv[])
 		}
 		else
 		{
-			/* TODO: Parse return value*/
 			configFileRead(argv[1]);
 		}
 	}
@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
     ERRORCHECK(registerRemoteControllerCallback(remoteControllerCallback));
     
     /* initialize stream controller module */
-    ERRORCHECK(streamControllerInit());
+    ERRORCHECK(streamControllerInit(configInputConfig));
 
     /* wait for a EXIT remote controller key press event */
     pthread_mutex_lock(&deinitMutex);
@@ -169,6 +169,7 @@ int configFileRead(char fileName[])
 					paramValueCounterAux++;
 				}
 				paramValueInt = atoi(paramValue);
+				configInputConfig.frequency = paramValueInt;
 				printf("\nParam Value[Freq]:%d", paramValueInt);
 			}
 			else if(strstr(lineBuffer, "Bandwidth") != NULL)
@@ -188,6 +189,7 @@ int configFileRead(char fileName[])
 					paramValueCounterAux++;
 				}
 				paramValueInt = atoi(paramValue);
+				configInputConfig.bandwidth = paramValueInt;
 				printf("\nParam Value[Bandwidth]:%d", paramValueInt);
 			}
 			else if(strstr(lineBuffer, "Module") != NULL)
@@ -205,6 +207,14 @@ int configFileRead(char fileName[])
 					paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
 					paramValueCounter++;
 					paramValueCounterAux++;
+				}
+				if(strcmp(paramValue, "DVB_T") == 0)
+				{
+					configInputConfig.module = DVB_T;
+				}
+				else if(strcmp(paramValue, "DVB_T2") == 0)
+				{
+					configInputConfig.module = DVB_T2;
 				}
 				printf("\nParam Value[Module]:%s", paramValue);
 			}
@@ -225,6 +235,7 @@ int configFileRead(char fileName[])
 					paramValueCounterAux++;
 				}
 				paramValueInt = atoi(paramValue);
+				configInputConfig.programNumber = paramValueInt;
 				printf("\nParam Value[ProgramNumber]:%d", paramValueInt);
 			}
 		}
