@@ -128,108 +128,66 @@ int configFileRead(char fileName[])
     size_t bufferSize = 128;
     ssize_t read;
 
+	char paramName[10];
 	char paramValue[10];
-	int paramValueInt = 0;
 
-	int paramValueCounter = 0;
-    int paramValueCounterAux = 0;
-
-    /* Pointing to static array to avoid memory leak in case of */
-    /* premature closure of the program */
-	lineBuffer = &fileLineBuffer;
-
+	uint8_t paramValueCounter = 0;
+	
+	lineBuffer = &fileLineBuffer; 
 	filePtr = fopen(fileName, "r");
-
+	
 	if(filePtr == NULL)
 	{
 		printf("\nERROR opening file %s\n", fileName);
 		return 0;
 	}
+	
+	//lineBuffer = (char *)malloc(bufferSize * sizeof(char));
 
+	if(lineBuffer == NULL)
+	{
+		printf("\nERROR allocating memory!\n");
+		return 0;
+	}
 	/* getline bugs occasionally, replace! */
-	while((read = getline(&lineBuffer, &bufferSize, filePtr)) != -1)
+	while((read = getline(&lineBuffer, &bufferSize, filePtr)) != -1) 
 	{
  		/* Check if first char is '#' thats is comment or empty line */
 		if(lineBuffer[0] != '#' && lineBuffer != '\0')
-		{
-			if(strstr(lineBuffer, "Freq") != NULL)
+		{	
+			if(strstr(lineBuffer, "Module") != NULL)
 			{
+				printf("\n\nizlaz:%s", lineBuffer);
 				paramValueCounter = 0;
-				memset(paramValue,'\0',sizeof(paramValue)); /* Cleaning paramValue buffer */
 				while(lineBuffer[paramValueCounter] != '"')
-				{
+				{	
 					paramValueCounter++;
 				}
-				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-                paramValueInt = atoi(paramValue);
-				printf("\nParam Value[Freq]:%d", paramValueInt);
+				printf("\nparamCounter:%d", paramValueCounter);
 			}
 			else if(strstr(lineBuffer, "Bandwidth") != NULL)
 			{
-				paramValueCounter = 0;
-				memset(paramValue,'\0',sizeof(paramValue)); /* Cleaning paramValue buffer */
-				while(lineBuffer[paramValueCounter] != '"')
-				{
-					paramValueCounter++;
-				}
-				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-                paramValueInt = atoi(paramValue);
-				printf("\nParam Value[Bandwidth]:%d", paramValueInt);
+				printf("\n\nizlaz:%s", lineBuffer);
+
 			}
-			else if(strstr(lineBuffer, "Module") != NULL)
+			else if(strstr(lineBuffer, "Freq") != NULL)
 			{
-				paramValueCounter = 0;
-				memset(paramValue,'\0',sizeof(paramValue)); /* Cleaning paramValue buffer */
-				while(lineBuffer[paramValueCounter] != '"')
-				{
-					paramValueCounter++;
-				}
-				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-				printf("\nParam Value[Module]:%s", paramValue);
+				printf("\n\nizlaz:%s", lineBuffer);
 			}
 			else if(strstr(lineBuffer, "ProgramNumber") != NULL)
 			{
-				paramValueCounter = 0;
-				memset(paramValue,'\0',sizeof(paramValue));
-				while(lineBuffer[paramValueCounter] != '"')
-				{
-					paramValueCounter++;
-				}
-				paramValueCounter += 1;
-                paramValueCounterAux = 0;
-                while(lineBuffer[paramValueCounter] != '"')
-                {
-                    paramValue[paramValueCounterAux] = lineBuffer[paramValueCounter];
-                    paramValueCounter++;
-                    paramValueCounterAux++;
-                }
-                paramValueInt = atoi(paramValue);
-				printf("\nParam Value[ProgramNumber]:%d", paramValueInt);
+				printf("\n\nizlaz:%s", lineBuffer);
 			}
+			
+			
+			//printf("\nparamName:%s", paramName);
+			//printf("\nparamValue:%s", paramValue);
+			//printf("\n");
+				
 		}
     }
 
+	//free(lineBuffer);
 	fclose(filePtr);
 }
 
