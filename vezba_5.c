@@ -1,5 +1,6 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
+#include <signal.h>
 
 
 static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
@@ -30,6 +31,17 @@ static ChannelInfo channelInfo;
 static InputConfig configInputConfig;
 
 int configFileRead(char fileName[]);
+void timeOutChannelTrigger();
+
+static timer_t keyTimer;
+static struct itimerspec timerSpec;
+static struct itimerspec timerSpecOld;
+static struct sigevent signalEvent;
+static int32_t timerFlags = 0;
+
+static int32_t pressedKeys[3];
+static int8_t pressedKeysCounter = 0;
+static int8_t anyKeyPressedFlag = 0;
 
 int main(int argc, char *argv[])
 {
@@ -55,6 +67,18 @@ int main(int argc, char *argv[])
 			configFileRead(argv[1]);
 		}
 	}
+
+	signalEvent.sigev_notify = SIGEV_THREAD;
+	signalEvent.sigev_notify_function = timeOutChannelTrigger;
+	signalEvent.sigev_value.sival_ptr = NULL;
+	signalEvent.sigev_notify_attributes = NULL;
+	timer_create(CLOCK_REALTIME, &signalEvent, &keyTimer);
+
+	printf("\nNapravio timer!\n");
+
+	memset(&timerSpec, 0, sizeof(timerSpec));
+	timerSpec.it_value.tv_sec = 2;
+	timerSpec.it_value.tv_nsec = 0;
 
     /* initialize remote controller module */
     ERRORCHECK(remoteControllerInit());
@@ -87,35 +111,74 @@ int main(int argc, char *argv[])
 
 void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 {
-    switch(code)
+	if(code >= KEYCODE_1 && code <= KEYCODE_0)
 	{
-		case KEYCODE_INFO:
-            printf("\nInfo pressed\n");          
-            if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
-            {
-                printf("\n********************* Channel info *********************\n");
-                printf("Program number: %d\n", channelInfo.programNumber);
-                printf("Audio pid: %d\n", channelInfo.audioPid);
-                printf("Video pid: %d\n", channelInfo.videoPid);
-                printf("**********************************************************\n");
-            }
-			break;
-		case KEYCODE_P_PLUS:
-			printf("\nCH+ pressed\n");
-            channelUp();
-			break;
-		case KEYCODE_P_MINUS:
-		    printf("\nCH- pressed\n");
-            channelDown();
-			break;
-		case KEYCODE_EXIT:
-			printf("\nExit pressed\n");
-            pthread_mutex_lock(&deinitMutex);
-		    pthread_cond_signal(&deinitCond);
-		    pthread_mutex_unlock(&deinitMutex);
-			break;
-		default:
-			printf("\nPress P+, P-, info or exit! \n\n");
+		printf("\nUSAO1");
+		if(pressedKeysCounter == 0)
+		{
+			//prvi put stisnuo
+			timer_settime(keyTimer, timerFlags, &timerSpec, &timerSpecOld);
+			pressedKeys[0] = 0;
+			pressedKeys[1] = 0;
+			pressedKeys[2] = 0;
+
+			pressedKeys[0] = code;
+			pressedKeysCounter++;
+			printf("\nUSAO2");			
+		}
+		else if (pressedKeysCounter == 1)
+		{
+			printf("\nUSAO3");
+			pressedKeys[1] = code;
+			pressedKeysCounter++;
+		}
+		else if(pressedKeysCounter >= 2)
+		{
+			printf("\nUSAO4");
+			if(anyKeyPressedFlag == 0)
+			{
+				pressedKeys[2] = code;
+				anyKeyPressedFlag = 1;
+			}
+			//timer_stop
+			//go_to_channel
+			
+		}
+	
+		fflush(stdout);
+	}
+	else
+	{
+		switch(code)
+		{
+			case KEYCODE_INFO:
+            	printf("\nInfo pressed\n");          
+	            if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+    	        {
+    	            printf("\n********************* Channel info *********************\n");
+    	            printf("Program number: %d\n", channelInfo.programNumber);
+    	            printf("Audio pid: %d\n", channelInfo.audioPid);
+    	            printf("Video pid: %d\n", channelInfo.videoPid);
+    	            printf("**********************************************************\n");
+    	        }
+				break;
+			case KEYCODE_P_PLUS:
+				printf("\nCH+ pressed\n");
+    	        channelUp();
+				break;
+			case KEYCODE_P_MINUS:
+			    printf("\nCH- pressed\n");
+    	        channelDown();
+				break;
+			case KEYCODE_EXIT:
+				printf("\nExit pressed\n");
+    	        pthread_mutex_lock(&deinitMutex);
+			    pthread_cond_signal(&deinitCond);
+			    pthread_mutex_unlock(&deinitMutex);
+				break;
+			default:
+				printf("\nPress P+, P-, info or exit! \n\n");
+		}
 	}
 }
 
@@ -244,7 +307,17 @@ int configFileRead(char fileName[])
 	fclose(filePtr);
 }
 
+void timeOutChannelTrigger()
+{
+	anyKeyPressedFlag = 0;
+	pressedKeysCounter = 0;
+	printf("\nOKINUO_TIMER[%d%d%d]\n", pressedKeys[0] - 1, pressedKeys[1] - 1, pressedKeys[2] - 1);
+	fflush(stdout);
+	//switch_channel
 
+
+
+}
 
 
 
