@@ -1,5 +1,6 @@
 #include "remote_controller.h"
 #include "stream_controller.h"
+#include "osd_graphics.h"
 #include <signal.h>
 
 
@@ -82,6 +83,9 @@ int main(int argc, char *argv[])
 
     /* initialize remote controller module */
     ERRORCHECK(remoteControllerInit());
+
+	/* initialize graphic controller module */
+	ERRORCHECK(graphicInit());
     
     /* register remote controller callback */
     ERRORCHECK(registerRemoteControllerCallback(remoteControllerCallback));
@@ -102,6 +106,9 @@ int main(int argc, char *argv[])
 
     /* deinitialize remote controller module */
     ERRORCHECK(remoteControllerDeinit());
+	
+	/* deinitialize graphic controller module */
+	ERRORCHECK(graphicDeinit());
 
     /* deinitialize stream controller module */
     ERRORCHECK(streamControllerDeinit());
@@ -111,6 +118,10 @@ int main(int argc, char *argv[])
 
 void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 {
+
+	GraphicControllerFlags* gcf = getGraphicFlags();
+	
+	
 	if(code >= KEYCODE_1 && code <= KEYCODE_0)
 	{
 		if(pressedKeysCounter == 0)
@@ -153,14 +164,20 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
     	            printf("Video pid: %d\n", channelInfo.videoPid);
     	            printf("**********************************************************\n");
     	        }
+				gcf->audioPid = channelInfo.audioPid;
+				gcf->videoPid = channelInfo.videoPid;
+				gcf->channelNum = channelInfo.programNumber;
+				gcf->draw = 1;
 				break;
 			case KEYCODE_P_PLUS:
 				printf("\nCH+ pressed\n");
     	        channelUp();
+				gcf->draw = 1;
 				break;
 			case KEYCODE_P_MINUS:
 			    printf("\nCH- pressed\n");
     	        channelDown();
+				gcf->draw = 1;
 				break;
 			case KEYCODE_EXIT:
 				printf("\nExit pressed\n");
