@@ -14,8 +14,10 @@ static uint32_t streamHandleA = 0;
 static uint32_t streamHandleV = 0;
 static uint32_t filterHandle = 0;
 static uint8_t threadExit = 0;
+
 static bool changeChannel = false;
 static int16_t programNumber = 0;
+
 static ChannelInfo currentChannel;
 static bool isInitialized = false;
 
@@ -343,6 +345,13 @@ void* streamControllerTask()
             startChannel(programNumber);
         }
     }
+}
+
+
+void changeChannelExtern(int16_t channelNumber)
+{
+	programNumber = channelNumber;
+	changeChannel = true;
 }
 
 int32_t sectionReceivedCallback(uint8_t *buffer)

@@ -113,36 +113,28 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 {
 	if(code >= KEYCODE_1 && code <= KEYCODE_0)
 	{
-		printf("\nUSAO1");
 		if(pressedKeysCounter == 0)
 		{
-			//prvi put stisnuo
 			timer_settime(keyTimer, timerFlags, &timerSpec, &timerSpecOld);
 			pressedKeys[0] = 0;
 			pressedKeys[1] = 0;
 			pressedKeys[2] = 0;
 
 			pressedKeys[0] = code;
-			pressedKeysCounter++;
-			printf("\nUSAO2");			
+			pressedKeysCounter++;			
 		}
 		else if (pressedKeysCounter == 1)
 		{
-			printf("\nUSAO3");
 			pressedKeys[1] = code;
 			pressedKeysCounter++;
 		}
 		else if(pressedKeysCounter >= 2)
 		{
-			printf("\nUSAO4");
 			if(anyKeyPressedFlag == 0)
 			{
 				pressedKeys[2] = code;
 				anyKeyPressedFlag = 1;
 			}
-			//timer_stop
-			//go_to_channel
-			
 		}
 	
 		fflush(stdout);
@@ -309,14 +301,43 @@ int configFileRead(char fileName[])
 
 void timeOutChannelTrigger()
 {
+	int convertedKey = 0;
+
 	anyKeyPressedFlag = 0;
 	pressedKeysCounter = 0;
-	printf("\nOKINUO_TIMER[%d%d%d]\n", pressedKeys[0] - 1, pressedKeys[1] - 1, pressedKeys[2] - 1);
+
+	if(pressedKeys[0] == 11)
+	{
+		pressedKeys[0] = 1;
+	}
+	if(pressedKeys[1] == 11)
+	{
+		pressedKeys[1] = 1;
+	}
+	if(pressedKeys[1] == 11)
+	{
+		pressedKeys[1] = 1;
+	}
+
+	if(pressedKeys[0] != 0 && pressedKeys[1] == 0 && pressedKeys[2] == 0)
+	{		
+		convertedKey = pressedKeys[0] - 1;
+	}
+	else if(pressedKeys[0] != 0 && pressedKeys[1] != 0 && pressedKeys[2] == 0)
+	{
+		convertedKey = (pressedKeys[0] - 1) * 10;
+		convertedKey += pressedKeys[1] - 1;
+	}
+	else if(pressedKeys[0] != 0 && pressedKeys[1] != 0 && pressedKeys[2] != 0)
+	{		
+		convertedKey = (pressedKeys[0] - 1) * 100;
+		convertedKey += (pressedKeys[1] - 1) * 10;
+		convertedKey += pressedKeys[2] - 1;
+
+	}
+	printf("\nUnet broj%d\n", convertedKey);
 	fflush(stdout);
-	//switch_channel
-
-
-
+	changeChannelExtern(convertedKey);
 }
 
 

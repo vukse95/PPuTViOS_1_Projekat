@@ -82,4 +82,9 @@ StreamControllerError channelDown();
  */
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 
+
+
+/* TODO:Napisati Dokumentaciju */
+void changeChannelExtern(int16_t channelNumber);
+
 #endif /* __STREAM_CONTROLLER_H__ */
