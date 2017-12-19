@@ -350,7 +350,7 @@ void* streamControllerTask()
 
 void changeChannelExtern(int16_t channelNumber)
 {
-	programNumber = channelNumber;
+	programNumber = channelNumber - 1;
 	changeChannel = true;
 }
 

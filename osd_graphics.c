@@ -101,8 +101,6 @@ void* graphicControllerTask(void* params)
     {
         if (OsdInfo.draw == 1)
         {
-            usleep(300000);
-
             OsdInfo.draw = 0;
 
             /* check whether the screen should be black */
@@ -191,8 +189,7 @@ void* graphicControllerTask(void* params)
             /* flip the buffers */
             DFBCHECK(primary->Flip(primary, NULL, 0));
         }
-
-        usleep(100000);
+		usleep(100000);
     }
 }
 
