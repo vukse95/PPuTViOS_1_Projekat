@@ -127,7 +127,7 @@ void* graphicControllerTask(void* params)
             /* draw channel number */
             fontDesc.flags = DFDESC_HEIGHT;
             fontDesc.height = 48;
-            sprintf(channelString, "%d", OsdInfo.channelNumber);
+            sprintf(channelString, "%d", OsdInfo.channelNum);
             DFBCHECK(dfbInterface->CreateFont(dfbInterface, "/home/galois/fonts/DejaVuSans.ttf", &fontDesc, &fontInterface));
             DFBCHECK(primary->SetColor(primary, 0xff, 0x03, 0x03, 0xff));
             DFBCHECK(primary->SetFont(primary, fontInterface));

@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 	signalEvent.sigev_notify_attributes = NULL;
 	timer_create(CLOCK_REALTIME, &signalEvent, &keyTimer);
 
-	printf("\nNapravio timer!\n");
+	printf("\nTimer init!\n");
 
 	memset(&timerSpec, 0, sizeof(timerSpec));
 	timerSpec.it_value.tv_sec = 2;
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
     ERRORCHECK(remoteControllerInit());
 
 	/* initialize graphic controller module */
-	ERRORCHECK(graphicInit());
+	ERRORCHECK(OsdInit());
     
     /* register remote controller callback */
     ERRORCHECK(registerRemoteControllerCallback(remoteControllerCallback));
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
     ERRORCHECK(remoteControllerDeinit());
 	
 	/* deinitialize graphic controller module */
-	ERRORCHECK(graphicDeinit());
+	ERRORCHECK(OsdDeinit());
 
     /* deinitialize stream controller module */
     ERRORCHECK(streamControllerDeinit());
@@ -119,7 +119,7 @@ int main(int argc, char *argv[])
 void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 {
 
-	GraphicControllerFlags* gcf = getGraphicFlags();
+	OsdGraphicsInfo* osd = getOsdInfo();
 	
 	
 	if(code >= KEYCODE_1 && code <= KEYCODE_0)
@@ -163,21 +163,22 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
     	            printf("Audio pid: %d\n", channelInfo.audioPid);
     	            printf("Video pid: %d\n", channelInfo.videoPid);
     	            printf("**********************************************************\n");
+					
+					osd->audioPid = channelInfo.audioPid;
+					osd->videoPid = channelInfo.videoPid;
+					osd->channelNumber = channelInfo.programNumber;
+					osd->draw = 1;
     	        }
-				gcf->audioPid = channelInfo.audioPid;
-				gcf->videoPid = channelInfo.videoPid;
-				gcf->channelNum = channelInfo.programNumber;
-				gcf->draw = 1;
 				break;
 			case KEYCODE_P_PLUS:
 				printf("\nCH+ pressed\n");
     	        channelUp();
-				gcf->draw = 1;
+				osd->draw = 1;
 				break;
 			case KEYCODE_P_MINUS:
 			    printf("\nCH- pressed\n");
     	        channelDown();
-				gcf->draw = 1;
+				osd->draw = 1;
 				break;
 			case KEYCODE_EXIT:
 				printf("\nExit pressed\n");
@@ -185,6 +186,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			    pthread_cond_signal(&deinitCond);
 			    pthread_mutex_unlock(&deinitMutex);
 				break;
+			/* TODO: Odraditi za volume i za mute! */
 			default:
 				printf("\nPress P+, P-, info or exit! \n\n");
 		}

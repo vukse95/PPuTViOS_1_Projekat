@@ -14,7 +14,7 @@ typedef struct _OsdGraphicsInfo
 {
     int32_t audioPid;
     int32_t videoPid;
-    uint16_t channelNumber;
+    uint16_t channelNum;
     uint8_t volume;
     uint8_t isMuted;
     uint8_t hasTeletext;
