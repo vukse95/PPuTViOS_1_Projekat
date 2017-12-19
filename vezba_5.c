@@ -44,6 +44,9 @@ static int32_t pressedKeys[3];
 static int8_t pressedKeysCounter = 0;
 static int8_t anyKeyPressedFlag = 0;
 
+static int8_t mutedVolume = 0;
+static int8_t mutePressed = 0;
+
 int main(int argc, char *argv[])
 {
 	char *ret;
@@ -216,7 +219,19 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 				break;
 			case KEYCODE_MUTE:
 				printf("\nMUTE pressed\n");
-
+				/* TODO: MUTE odraditi i na set top-boxu */
+				if(mutePressed == 0)
+				{
+					mutedVolume = osd->volume;
+					osd->volume = 0;
+					mutePressed = 1;
+				}
+				else if(mutePressed == 1)
+				{
+					osd->volume = mutedVolume;
+					mutePressed = 0;
+				}
+				osd->drawVolume = 1;
 				break;
 			case KEYCODE_EXIT:
 				printf("\nExit pressed\n");
