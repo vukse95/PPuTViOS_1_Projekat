@@ -173,12 +173,50 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			case KEYCODE_P_PLUS:
 				printf("\nCH+ pressed\n");
     	        channelUp();
-				osd->draw = 1;
+				/* TODO: Odraditi bolje ako ostane vremena */
+				usleep(900000);
+				if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+				{
+					osd->audioPid = channelInfo.audioPid;
+					osd->videoPid = channelInfo.videoPid;
+					osd->channelNumber = channelInfo.programNumber;
+					osd->draw = 1;
+				}
 				break;
 			case KEYCODE_P_MINUS:
 			    printf("\nCH- pressed\n");
     	        channelDown();
-				osd->draw = 1;
+				/* TODO: Odraditi bolje ako ostane vremena */
+				usleep(900000);
+				if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+				{
+					osd->audioPid = channelInfo.audioPid;
+					osd->videoPid = channelInfo.videoPid;
+					osd->channelNumber = channelInfo.programNumber;
+					osd->draw = 1;
+				}
+				break;
+			case KEYCODE_VOL_UP:
+				printf("\nVOL+ pressed\n");
+				osd->drawVolume = 1;
+				if(osd->volume >=0 && osd->volume < 10)
+				{
+					osd->volume++;
+					/* TODO: Povecati volume na set top-boxu */
+				}
+				break;
+			case KEYCODE_VOL_DOWN:
+				printf("\nVOL- pressed\n");
+				osd->drawVolume = 1;
+				if(osd->volume > 0 && osd->volume <= 10)
+				{
+					osd->volume--;
+					/* TODO: Smanjiti volume na set top-boxu */
+				}
+				break;
+			case KEYCODE_MUTE:
+				printf("\nMUTE pressed\n");
+
 				break;
 			case KEYCODE_EXIT:
 				printf("\nExit pressed\n");
@@ -321,6 +359,7 @@ int configFileRead(char fileName[])
 void timeOutChannelTrigger()
 {
 	int convertedKey = 0;
+	OsdGraphicsInfo* osd = getOsdInfo();
 
 	anyKeyPressedFlag = 0;
 	pressedKeysCounter = 0;
@@ -357,6 +396,15 @@ void timeOutChannelTrigger()
 	printf("\nUnet broj%d\n", convertedKey);
 	fflush(stdout);
 	changeChannelExtern(convertedKey);
+	/* TODO: Odraditi bolje ako ostane vremena */
+	usleep(900000);
+	if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
+	{
+		osd->audioPid = channelInfo.audioPid;
+		osd->videoPid = channelInfo.videoPid;
+		osd->channelNumber = channelInfo.programNumber;
+		osd->draw = 1;
+	}
 }
 
 
