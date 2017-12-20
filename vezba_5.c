@@ -124,7 +124,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 {
 
 	OsdGraphicsInfo* osd = getOsdInfo();
-	EitTable *eitTable = eitTableGet();
+	eitBufferElement *eitTable = eitTableGet();
 	
 	if(code >= KEYCODE_1 && code <= KEYCODE_0)
 	{
@@ -167,8 +167,8 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
     	            printf("Audio pid: %d\n", channelInfo.audioPid);
     	            printf("Video pid: %d\n", channelInfo.videoPid);
     	            printf("**********************************************************\n");
-					//printf("Name:%s\n", eitTable->eitHeader->eventNameChar);					
-
+					//printf("Name:%s\n", eitTable[]->name);					
+					eitTableGet();
 
 					osd->audioPid = channelInfo.audioPid;
 					osd->videoPid = channelInfo.videoPid;

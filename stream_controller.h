@@ -47,6 +47,16 @@ typedef struct _ChannelInfo
 }ChannelInfo;
 
 /**
+ * @brief Structure that defines current name and genre
+ */
+typedef struct _eitBufferElement
+{
+    int16_t programNumber;
+    char name[128];
+    char genre[64];
+}eitBufferElement;
+
+/**
  * @brief Initializes stream controller module
  *
  * @return stream controller error code
@@ -89,6 +99,10 @@ void changeChannelExtern(int16_t channelNumber);
 
 /* TODO:Napisati dokumentaciju */
 
-EitTable* eitTableGet();
+eitBufferElement* eitTableGet();
+
+/* TODO:Napisati dokumentaciju */
+
+void eitBufferFilling(EitTable* eitTableElement);
 
 #endif /* __STREAM_CONTROLLER_H__ */

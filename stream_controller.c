@@ -4,6 +4,9 @@ static PatTable *patTable;
 static PmtTable *pmtTable;
 static EitTable *eitTable;
 
+static eitBufferElement *eitBuffer;
+static eitBufferSize = 0;
+
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -85,6 +88,7 @@ StreamControllerError streamControllerDeinit()
     free(patTable);
     free(pmtTable);
 	free(eitTable);
+	free(eitBuffer);
     
     /* set isInitialized flag */
     isInitialized = false;
@@ -188,7 +192,7 @@ void startChannel(int32_t channelNumber)
 		printf("\n%s : ERROR EIT parse timeout exceeded!\n", __FUNCTION__);
 	}
 	pthread_mutex_unlock(&demuxMutex);
-	/* TODO: Mogao bih zaustaviti */
+	/*
 	printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
 	printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
 	if(patTable->patServiceInfoArray[channelNumber + 1].programNumber == eitTable->eitHeader.serviceId)
@@ -196,6 +200,7 @@ void startChannel(int32_t channelNumber)
 		printf("\n\nNasao kanal prema EIT\n\n");
 
 	}
+	*/
 	printf("\nParsed EIT table!\n");
     
     /* get audio and video pids */
@@ -287,6 +292,8 @@ void* streamControllerTask()
         return (void*) SC_ERROR;
 	}  
     memset(eitTable, 0x0, sizeof(EitTable));
+
+	
        
     /* initialize tuner device */
     if(Tuner_Init())
@@ -295,6 +302,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(eitTable);
+		free(eitBuffer);
         return (void*) SC_ERROR;
     }
     
@@ -315,6 +323,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(eitTable);
+		free(eitBuffer);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -327,6 +336,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(eitTable);
+		free(eitBuffer);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -339,6 +349,7 @@ void* streamControllerTask()
 		free(patTable);
         free(pmtTable);
 		free(eitTable);
+		free(eitBuffer);
         Tuner_Deinit();
         return (void*) SC_ERROR;
 	}
@@ -350,6 +361,7 @@ void* streamControllerTask()
 		free(patTable);
         free(pmtTable);
 		free(eitTable);
+		free(eitBuffer);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;	
@@ -374,6 +386,7 @@ void* streamControllerTask()
         free(patTable);
         free(pmtTable);
 		free(eitTable);
+		free(eitBuffer);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;
@@ -418,6 +431,11 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
             
         }
+	/* S obzirom da ce jednom uci samo ;) */
+
+	eitBuffer = (eitBufferElement*)malloc(patTable->serviceInfoCount * sizeof(eitBufferElement));
+	eitBufferSize = patTable->serviceInfoCount;
+	memset(eitBuffer, -1, sizeof(eitBuffer));
     } 
     else if (tableId==0x02)
     {
@@ -433,10 +451,15 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
     }
 	else if (tableId==0x4E)
 	{
-		printf("\n%s -----EIT TABLE ARRIVED-----\n",__FUNCTION__);
+		//printf("\n%s -----EIT TABLE ARRIVED-----\n",__FUNCTION__);
 		if(parseEitTable(buffer,eitTable)==TABLES_PARSE_OK)
         {
-            printEitTable(eitTable);
+            //printEitTable(eitTable);
+			/* Punim strukturu */
+			
+			eitBufferFilling(eitTable);
+
+			/* Punim strukturu */
             pthread_mutex_lock(&demuxMutex);
 		    pthread_cond_signal(&demuxCond);
 		    pthread_mutex_unlock(&demuxMutex);
@@ -461,8 +484,65 @@ int32_t tunerStatusCallback(t_LockStatus status)
     return 0;
 }
 
-
-EitTable* eitTableGet()
+/* NE RADI DOBRO!!! */
+eitBufferElement* eitTableGet()
 {
-	return eitTable;
+	int i;
+	eitBufferFilling(eitBuffer);
+	printf("\n\nTrazi INFO za kanal\n");
+	printf("eitBufferSize:%d\n", eitBufferSize);
+	for(i = 0; i < eitBufferSize; i++)
+	{
+		printf("\nUsao u for!!!\n");
+		printf("Buffer_Program_Number%d", eitBuffer[i].programNumber);
+		printf("PAT_Program_Number%d", patTable->patServiceInfoArray[currentChannel.programNumber].programNumber);
+		fflush(stdin);
+		//printf("Buffer_Program_name%s", eitBuffer[i].name);
+		if(eitBuffer[i].programNumber == patTable->patServiceInfoArray[currentChannel.programNumber].programNumber)
+		{
+			/* Nasao koji info treba da se prosledi */
+			printf("\n\nNumber:%d\n", eitBuffer[i].programNumber);
+			printf("\n\nName:%s", eitBuffer[i].name);
+		}
+	}	
+	
+	return eitBuffer;
+}
+/* NE RADI DOBRO! */
+void eitBufferFilling(EitTable* eitTableElement)
+{
+	int i, j;
+	int channelExists = 0;
+
+	for(i = 0; i < eitBufferSize; i++)
+	{
+		channelExists = 0;
+		for(j = 0; j < eitBufferSize; j++)
+		{
+			if(eitBuffer[i].programNumber == eitTable->eitHeader.serviceId)
+			{
+				//zameni
+				strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
+				/* TODO: URADI ZA ZANAR!! */
+				channelExists = 1;
+			}
+			else
+			{
+				channelExists = 0;
+			}
+		}
+		for(j = 0; j < eitBufferSize; j++)
+		{
+			if(eitBuffer[i].programNumber == -1)
+			{
+				eitBuffer[i].programNumber = eitTable->eitHeader.serviceId;
+				strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
+				/* TODO: URADI ZA ZANAR!! */
+			}
+		}
+	}
+	///	eitBuffer
+	//printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
+	//printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
+
 }

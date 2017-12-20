@@ -272,7 +272,7 @@ ParseErrorCode parsePmtTable(const uint8_t* pmtSectionBuffer, PmtTable* pmtTable
 
 ParseErrorCode parseEitHeader(const uint8_t* eitHeaderBuffer, EitHeader* eitHeader)
 {
-	printf("parse eit heder: eitHeder=%d\n", eitHeader);
+	//printf("parse eit heder: eitHeder=%d\n", eitHeader);
 	
 	if(eitHeaderBuffer==NULL || eitHeader==NULL)
     {
@@ -292,7 +292,7 @@ ParseErrorCode parseEitHeader(const uint8_t* eitHeaderBuffer, EitHeader* eitHead
         return TABLES_PARSE_ERROR;
     }
 
-	printf("parse eit heder: pocelo parsiranje eit hedera.\n");	
+	//printf("parse eit heder: pocelo parsiranje eit hedera.\n");	
 
 	//section sintax indicator
 	lower8Bits = (uint8_t)(*(eitHeaderBuffer + 1));
@@ -348,7 +348,7 @@ ParseErrorCode parseEitHeader(const uint8_t* eitHeaderBuffer, EitHeader* eitHead
 	lower8Bits = (uint8_t) (*(eitHeaderBuffer + 13));
     eitHeader->lastTableId = lower8Bits & 0xFF;
 
-	printf("parseEitHeder : zavrseno parsiranje eit hedera\n");
+	//printf("parseEitHeder : zavrseno parsiranje eit hedera\n");
 	return TABLES_PARSE_OK;
 }
 
@@ -423,12 +423,12 @@ ParseErrorCode parseEitServiceInfo(const uint8_t* eitServiceInfoBuffer, EitServi
 		pointer += 2 + *(pointer+1);
 		descriptor_tag = *pointer;
 	}
-	
+	/*
 	if(descriptor_tag == 0x4D)
 	{
 		printf("Nasao sam ga\n");
 	}
-
+	*/
 
 	//descriptor tag
 	lower8Bits = (uint8_t) (*(pointer));
@@ -477,11 +477,11 @@ ParseErrorCode parseEitServiceInfo(const uint8_t* eitServiceInfoBuffer, EitServi
 		}
 	}
 
-	printf("Samo opis serije da se isprinta %s\n", eitServiceInfo->eitDescriptor.textChar);
+	//printf("Samo opis serije da se isprinta %s\n", eitServiceInfo->eitDescriptor.textChar);
 
 	eitServiceInfoBuffer += 12 + eitServiceInfo->descriptorsLoopLength;
 	(*parsedLen) += 12 + eitServiceInfo->descriptorsLoopLength;	
-	printf("CurrentBusPro i parseLen iz funkcije za parsiranje: %d %d\n", eitServiceInfoBuffer, (*parsedLen));
+	//printf("CurrentBusPro i parseLen iz funkcije za parsiranje: %d %d\n", eitServiceInfoBuffer, (*parsedLen));
 
     return TABLES_PARSE_OK;
 }
@@ -506,23 +506,23 @@ ParseErrorCode parseEitTable(const uint8_t* eitSectionBuffer, EitTable* eitTable
     parsedLength = 14; //tolika je velicina zaglavlja
     currentBufferPosition = (uint8_t *)(eitSectionBuffer + parsedLength); /* Position after last_section_number */
     eitTable->serviceInfoCount = 0; /* Number of services info presented in PAT table */
-	printf("vrednost za eitTable->serviceInfoCount odmah nakonn inicijalizacije je: %d\n", eitTable->serviceInfoCount);
+	//printf("vrednost za eitTable->serviceInfoCount odmah nakonn inicijalizacije je: %d\n", eitTable->serviceInfoCount);
     
     while(parsedLength < eitTable->eitHeader.sectionLength - 1)
     {
         if(parseEitServiceInfo(currentBufferPosition, &(eitTable->eitServiceInfoArray[eitTable->serviceInfoCount]), &parsedLength) == TABLES_PARSE_OK)
         {
-			printf("prosao je parseServiceInfo[%d]\n", eitTable->serviceInfoCount);
+			//printf("prosao je parseServiceInfo[%d]\n", eitTable->serviceInfoCount);
             //currentBufferPosition += 12; /* Size from program_number to pid */
             //parsedLength += 12; /* Size from program_number to pid */
             eitTable->serviceInfoCount ++;
         }    
 		//printf("Parsed length: \n", parsedLength);
 		//printf("CurrentBufferPosition \n", currentBufferPosition);
-		printf("Duzina eit tabele cele section length + ostatak zaglavlja = %d",eitTable->eitHeader.sectionLength + 3);
+		//printf("Duzina eit tabele cele section length + ostatak zaglavlja = %d",eitTable->eitHeader.sectionLength + 3);
     }
-	printf("Parsed length: %d\n", parsedLength);
-	printf("CurrentBufferPosition %d\n", currentBufferPosition);
+	//printf("Parsed length: %d\n", parsedLength);
+	//printf("CurrentBufferPosition %d\n", currentBufferPosition);
     
     return TABLES_PARSE_OK;	
 }
