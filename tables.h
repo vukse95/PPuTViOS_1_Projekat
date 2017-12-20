@@ -6,7 +6,8 @@
 #include <string.h>
 
 #define TABLES_MAX_NUMBER_OF_PIDS_IN_PAT    20 	    /* Max number of PMT pids in one PAT table */
-#define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20       /* Max number of elementary pids in one PMT table */
+#define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20      /* Max number of elementary pids in one PMT table */
+#define MAX_NUM_OF_SERVICES 20						/* Used for EIT tables */
 
 /**
  * @brief Enumeration of possible tables parser error codes
@@ -87,6 +88,61 @@ typedef struct _PmtTable
     PmtElementaryInfo pmtElementaryInfoArray[TABLES_MAX_NUMBER_OF_ELEMENTARY_PID];
     uint8_t elementaryInfoCount;
 }PmtTable;
+
+/* a structure that respresents eit table header*/
+typedef struct _EitTableHeader
+{
+    uint8_t     tableId;                            /* The type of table */
+    uint8_t     sectionSyntaxIndicator;             /* The format of the table section to follow */
+    uint16_t    sectionLength;                      /* The length of the table section beyond this field */
+	uint16_t	serviceId;
+    uint8_t     versionNumber;                      /* The version number the private table section */
+	uint8_t     currentNextIndicator;               /* Signals what a particular table will look like when it next changes */
+    uint8_t     sectionNumber;                      /* Section number */
+    uint8_t     lastSectionNumber;                  /* Signals the last section that is valid for a particular MPEG-2 private table */	
+	uint16_t    transportStreamId;                  /* Transport stream identifier */
+	uint16_t	originalNetworkId;
+	uint8_t		segmentLastSectionNumber;
+	uint8_t		lastTableId;
+}EitHeader;
+
+typedef struct _EitDescriptor
+{
+	uint8_t descriptorTag;
+	uint8_t descriptorLength;
+	uint32_t ISO639LanguageCode;
+	uint8_t eventNameLength;
+	char eventNameChar[512];
+	uint8_t textLength;
+	char textChar[512];
+}EitDescriptor;
+
+/*a structure that represents eit table section which contains service information*/
+typedef struct _EitServiceInfo
+{    
+	uint16_t eventId;
+	uint64_t startTime;
+	uint32_t duration;
+	uint8_t runningStatus;
+	uint8_t freeCAMode;
+	uint16_t descriptorsLoopLength;
+	EitDescriptor eitDescriptor;	
+}EitServiceInfo;
+
+/*a structure that respresents an entire parsed eit table*/
+typedef struct _EitTable
+{    
+    EitHeader eitHeader;                                        /* EIT Table Header */
+    EitServiceInfo eitServiceInfoArray[MAX_NUM_OF_SERVICES];    /* Services info presented in EIT table */
+    uint8_t serviceInfoCount;                                   /* Number of services info presented in EIT table */
+}EitTable;
+
+/*parsing eit header*/
+ParseErrorCode parseEitHeader(const uint8_t* eitHeaderBuffer, EitHeader* eitHeader);
+ParseErrorCode parseEitServiceInfo(const uint8_t* eitServiceInfoBuffer, EitServiceInfo* eitServiceInfo, uint32_t* parsedLen);
+ParseErrorCode parseEitTable(const uint8_t* eitSectionBuffer, EitTable* eitTable);
+ParseErrorCode printEitTable(EitTable* eitTable);
+
 
 /**
  * @brief  Parse PAT header.

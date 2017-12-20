@@ -2,6 +2,8 @@
 
 static PatTable *patTable;
 static PmtTable *pmtTable;
+static EitTable *eitTable;
+
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
 
@@ -82,6 +84,7 @@ StreamControllerError streamControllerDeinit()
     /* free allocated memory */  
     free(patTable);
     free(pmtTable);
+	free(eitTable);
     
     /* set isInitialized flag */
     isInitialized = false;
@@ -144,7 +147,6 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
  */
 void startChannel(int32_t channelNumber)
 {
-    
     /* free PAT table filter */
     Demux_Free_Filter(playerHandle, filterHandle);
     
@@ -163,6 +165,38 @@ void startChannel(int32_t channelNumber)
         streamControllerDeinit();
 	}
 	pthread_mutex_unlock(&demuxMutex);
+
+	printf("\nParsed PMT table!\n");
+
+	/* EIT table parsing */
+		
+
+	/* free PMT table filter */
+	Demux_Free_Filter(playerHandle, filterHandle);
+    
+	/* set demux filter for receive EIT  actual TS present/following table of program */
+	if(Demux_Set_Filter(playerHandle, 0x0012, 0x4E, &filterHandle))
+	{
+		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
+		return;
+	}
+    
+	/* wait for a EIT table to be parsed*/
+	pthread_mutex_lock(&demuxMutex);
+	if (ETIMEDOUT == pthread_cond_wait(&demuxCond, &demuxMutex))
+	{
+		printf("\n%s : ERROR EIT parse timeout exceeded!\n", __FUNCTION__);
+	}
+	pthread_mutex_unlock(&demuxMutex);
+	/* TODO: Mogao bih zaustaviti */
+	printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
+	printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
+	if(patTable->patServiceInfoArray[channelNumber + 1].programNumber == eitTable->eitHeader.serviceId)
+	{
+		printf("\n\nNasao kanal prema EIT\n\n");
+
+	}
+	printf("\nParsed EIT table!\n");
     
     /* get audio and video pids */
     int16_t audioPid = -1;
@@ -244,6 +278,15 @@ void* streamControllerTask()
         return (void*) SC_ERROR;
 	}  
     memset(pmtTable, 0x0, sizeof(PmtTable));
+
+	/* allocate memory for EIT table section */
+    eitTable=(EitTable*)malloc(sizeof(EitTable));
+    if(eitTable==NULL)
+    {
+		printf("\n%s : ERROR Cannot allocate memory for an EIT table\n", __FUNCTION__);
+        return (void*) SC_ERROR;
+	}  
+    memset(eitTable, 0x0, sizeof(EitTable));
        
     /* initialize tuner device */
     if(Tuner_Init())
@@ -251,6 +294,7 @@ void* streamControllerTask()
         printf("\n%s : ERROR Tuner_Init() fail\n", __FUNCTION__);
         free(patTable);
         free(pmtTable);
+		free(eitTable);
         return (void*) SC_ERROR;
     }
     
@@ -270,6 +314,7 @@ void* streamControllerTask()
         printf("\n%s: ERROR Tuner_Lock_To_Frequency(): %d Hz - fail!\n",__FUNCTION__,DESIRED_FREQUENCY);
         free(patTable);
         free(pmtTable);
+		free(eitTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -281,6 +326,7 @@ void* streamControllerTask()
         printf("\n%s : ERROR Lock timeout exceeded!\n",__FUNCTION__);
         free(patTable);
         free(pmtTable);
+		free(eitTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
     }
@@ -292,6 +338,7 @@ void* streamControllerTask()
 		printf("\n%s : ERROR Player_Init() fail\n", __FUNCTION__);
 		free(patTable);
         free(pmtTable);
+		free(eitTable);
         Tuner_Deinit();
         return (void*) SC_ERROR;
 	}
@@ -302,6 +349,7 @@ void* streamControllerTask()
 		printf("\n%s : ERROR Player_Source_Open() fail\n", __FUNCTION__);
 		free(patTable);
         free(pmtTable);
+		free(eitTable);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;	
@@ -325,6 +373,7 @@ void* streamControllerTask()
 		printf("\n%s:ERROR Lock timeout exceeded!\n", __FUNCTION__);
         free(patTable);
         free(pmtTable);
+		free(eitTable);
 		Player_Deinit(playerHandle);
         Tuner_Deinit();
         return (void*) SC_ERROR;
@@ -382,6 +431,17 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
         }
     }
+	else if (tableId==0x4E)
+	{
+		printf("\n%s -----EIT TABLE ARRIVED-----\n",__FUNCTION__);
+		if(parseEitTable(buffer,eitTable)==TABLES_PARSE_OK)
+        {
+            printEitTable(eitTable);
+            pthread_mutex_lock(&demuxMutex);
+		    pthread_cond_signal(&demuxCond);
+		    pthread_mutex_unlock(&demuxMutex);
+        }
+	}
     return 0;
 }
 
@@ -399,4 +459,10 @@ int32_t tunerStatusCallback(t_LockStatus status)
         printf("\n%s -----TUNER NOT LOCKED-----\n",__FUNCTION__);
     }
     return 0;
+}
+
+
+EitTable* eitTableGet()
+{
+	return eitTable;
 }

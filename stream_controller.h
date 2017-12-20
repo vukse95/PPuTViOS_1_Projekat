@@ -84,7 +84,11 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 
 
 
-/* TODO:Napisati Dokumentaciju */
+/* TODO:Napisati dokumentaciju */
 void changeChannelExtern(int16_t channelNumber);
+
+/* TODO:Napisati dokumentaciju */
+
+EitTable* eitTableGet();
 
 #endif /* __STREAM_CONTROLLER_H__ */
