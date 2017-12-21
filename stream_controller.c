@@ -5,7 +5,7 @@ static PmtTable *pmtTable;
 static EitTable *eitTable;
 
 static eitBufferElement *eitBuffer;
-static eitBufferSize = 0;
+static int32_t eitBufferSize = 0;
 
 static pthread_cond_t statusCondition = PTHREAD_COND_INITIALIZER;
 static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -418,7 +418,9 @@ void changeChannelExtern(int16_t channelNumber)
 
 int32_t sectionReceivedCallback(uint8_t *buffer)
 {
-    uint8_t tableId = *buffer;  
+    uint8_t tableId = *buffer;
+	int i;
+ 
     if(tableId==0x00)
     {
         //printf("\n%s -----PAT TABLE ARRIVED-----\n",__FUNCTION__);
@@ -431,11 +433,22 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		    pthread_mutex_unlock(&demuxMutex);
             
         }
-	/* S obzirom da ce jednom uci samo ;) */
-
-	eitBuffer = (eitBufferElement*)malloc(patTable->serviceInfoCount * sizeof(eitBufferElement));
-	eitBufferSize = patTable->serviceInfoCount;
-	memset(eitBuffer, -1, sizeof(eitBuffer));
+		/* S obzirom da ce jednom uci samo ;) */
+	
+		eitBufferSize = patTable->serviceInfoCount;
+		eitBuffer = malloc(eitBufferSize * sizeof(eitBufferElement));
+		
+		//printf("\n\neitBufferSizeCALLBACK:%d", eitBufferSize);
+		//printf("\neitBufferCALLBACK:%d\n", sizeof(eitBuffer[0]));
+		//printf("\nbufferElementCALLBACK:%d\n", sizeof(eitBufferElement));
+		
+		//memset(eitBuffer.programNumber, -1, sizeof(eitBuffer));
+	
+		/* Init eitBuffer */
+		for(i = 0; i < eitBufferSize; i++)
+		{
+			eitBuffer[i].programNumber = 0;
+		}
     } 
     else if (tableId==0x02)
     {
@@ -484,19 +497,25 @@ int32_t tunerStatusCallback(t_LockStatus status)
     return 0;
 }
 
-/* NE RADI DOBRO!!! */
+
 eitBufferElement* eitTableGet()
 {
 	int i;
-	eitBufferFilling(eitBuffer);
 	printf("\n\nTrazi INFO za kanal\n");
-	printf("eitBufferSize:%d\n", eitBufferSize);
+	printf("\n\n--------------------------------------\n");
 	for(i = 0; i < eitBufferSize; i++)
 	{
-		printf("\nUsao u for!!!\n");
-		printf("Buffer_Program_Number%d", eitBuffer[i].programNumber);
-		printf("PAT_Program_Number%d", patTable->patServiceInfoArray[currentChannel.programNumber].programNumber);
-		fflush(stdin);
+		printf("eitBuffer[%d].programNumber:%d\n", i, eitBuffer[i].programNumber);
+		printf("eitBuffer[%d].name:%s\n\n", i, eitBuffer[i].name);
+	}
+	printf("\n\n--------------------------------------\n");
+
+	for(i = 0; i < eitBufferSize; i++)
+	{
+		//printf("\nUsao u for!!!\n");
+		//printf("Buffer_Program_Number%d", eitBuffer[i].programNumber);
+		//printf("PAT_Program_Number%d", patTable->patServiceInfoArray[currentChannel.programNumber].programNumber);
+		//fflush(stdin);
 		//printf("Buffer_Program_name%s", eitBuffer[i].name);
 		if(eitBuffer[i].programNumber == patTable->patServiceInfoArray[currentChannel.programNumber].programNumber)
 		{
@@ -508,40 +527,44 @@ eitBufferElement* eitTableGet()
 	
 	return eitBuffer;
 }
-/* NE RADI DOBRO! */
+
 void eitBufferFilling(EitTable* eitTableElement)
 {
-	int i, j;
-	int channelExists = 0;
+	int i;
+	int infoFound = 0;
+	
+	//printf("\n\neitBufferSize:%d\n", eitBufferSize);
+	//printf("\neitBufferSizeOf:%d\n", sizeof(eitBuffer));	
 
 	for(i = 0; i < eitBufferSize; i++)
-	{
-		channelExists = 0;
-		for(j = 0; j < eitBufferSize; j++)
+	{	
+		
+		//printf("Vrednost za serviceId u petlji je: %d\n", eitTable->eitHeader.serviceId);	
+	 	//printf("Vrednost za programNumber u petlji je: %d\n",eitBuffer[i].programNumber);		
+		if(eitBuffer[i].programNumber == eitTable->eitHeader.serviceId)
 		{
-			if(eitBuffer[i].programNumber == eitTable->eitHeader.serviceId)
-			{
-				//zameni
-				strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
-				/* TODO: URADI ZA ZANAR!! */
-				channelExists = 1;
-			}
-			else
-			{
-				channelExists = 0;
-			}
+			//printf("Vrednost za eitBuffer[i].programNumber u petlji je: %d\n", eitBuffer[i].programNumber);		
+			//zameni
+			strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
+			/* TODO: URADI ZA ZANAR!! */
+			infoFound = 1;
+			break;
 		}
-		for(j = 0; j < eitBufferSize; j++)
+	}
+	if(infoFound == 0)
+	{
+		for(i = 0; i < eitBufferSize; i++)
 		{
-			if(eitBuffer[i].programNumber == -1)
+			if(eitBuffer[i].programNumber == 0)
 			{
 				eitBuffer[i].programNumber = eitTable->eitHeader.serviceId;
 				strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
 				/* TODO: URADI ZA ZANAR!! */
+				break;
 			}
 		}
 	}
-	///	eitBuffer
+
 	//printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
 	//printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
 
