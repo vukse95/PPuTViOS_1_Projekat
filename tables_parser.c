@@ -417,20 +417,35 @@ ParseErrorCode parseEitServiceInfo(const uint8_t* eitServiceInfoBuffer, EitServi
 	const uint8_t* pointer = (eitServiceInfoBuffer + 12);
 
 	uint8_t descriptor_tag = *pointer;
-	
-	while(descriptor_tag != 0x4D)
-	{
-		pointer += 2 + *(pointer+1);
-		descriptor_tag = *pointer;
-	}
-	/*
-	if(descriptor_tag == 0x4D)
-	{
-		printf("Nasao sam ga\n");
-	}
-	*/
 
-	//descriptor tag
+	uint8_t endOfDescriptor = eitServiceInfo->descriptorsLoopLength;
+	uint8_t descriptorLength;
+	int i = 0;
+
+	//printf("\n\nendOfDescriptor%d\n", endOfDescriptor);
+	
+	//pointer += *(pointer + 1);
+	//descriptor_tag = *pointer;	
+	
+	//printf("\nUSAO 1\n");
+
+	for(i = 0; i < endOfDescriptor; i++)
+	{
+		//printf("\nDescriptor%d\n", i);
+		pointer += *(pointer + 1);
+		descriptorLength = *pointer;
+		pointer += *(pointer + descriptorLength);
+		descriptor_tag = *(pointer - 1);
+		//printf("\nd12escriptor_tag:%x\n", descriptor_tag);
+		if(descriptor_tag == 0x4D)
+		{
+			printf("\n\nNasao sam %x\n", descriptor_tag);
+	
+	
+		}
+	}
+			//parseData(descriptor_tag, pointer, eitServiceInfo);
+			//descriptor tag
 	lower8Bits = (uint8_t) (*(pointer));
     eitServiceInfo->eitDescriptor.descriptorTag = lower8Bits & 0xFF;
 
@@ -477,11 +492,15 @@ ParseErrorCode parseEitServiceInfo(const uint8_t* eitServiceInfoBuffer, EitServi
 		}
 	}
 
-	//printf("Samo opis serije da se isprinta %s\n", eitServiceInfo->eitDescriptor.textChar);
+	printf("Samo opis serije da se isprinta %s\n", eitServiceInfo->eitDescriptor.textChar);
 
 	eitServiceInfoBuffer += 12 + eitServiceInfo->descriptorsLoopLength;
 	(*parsedLen) += 12 + eitServiceInfo->descriptorsLoopLength;	
 	//printf("CurrentBusPro i parseLen iz funkcije za parsiranje: %d %d\n", eitServiceInfoBuffer, (*parsedLen));
+	
+	
+
+	
 
     return TABLES_PARSE_OK;
 }
@@ -602,3 +621,80 @@ ParseErrorCode printPmtTable(PmtTable* pmtTable)
     
     return TABLES_PARSE_OK;
 }
+/*
+void parseData(uint8_t pointerTag, const uint8_t* pointer, EitServiceInfo* eitServiceInfo)
+{
+	   uint8_t lower8Bits = 0;
+    uint8_t higher8Bits = 0;
+    uint16_t all16Bits = 0;
+	
+	if(pointerTag == 0x4D)
+	{
+
+	//descriptor tag
+	lower8Bits = (uint8_t) (*(pointer));
+    eitServiceInfo->eitDescriptor.descriptorTag = lower8Bits & 0xFF;
+
+	//descriptor length
+	lower8Bits = (uint8_t) (*(pointer + 1));
+    eitServiceInfo->eitDescriptor.descriptorLength = lower8Bits & 0xFF;
+
+	//IS0 639 language code
+	eitServiceInfo->eitDescriptor.ISO639LanguageCode = 0x0;
+	lower8Bits = (uint8_t) (*(pointer + 2));
+    eitServiceInfo->eitDescriptor.ISO639LanguageCode += lower8Bits & 0xFF;
+	eitServiceInfo->eitDescriptor.ISO639LanguageCode = eitServiceInfo->eitDescriptor.ISO639LanguageCode << 8;
+	lower8Bits = (uint8_t) (*(pointer + 3));
+    eitServiceInfo->eitDescriptor.descriptorLength += lower8Bits & 0xFF;
+	eitServiceInfo->eitDescriptor.ISO639LanguageCode = eitServiceInfo->eitDescriptor.ISO639LanguageCode << 8;
+	lower8Bits = (uint8_t) (*(pointer + 4));
+    eitServiceInfo->eitDescriptor.descriptorLength += lower8Bits & 0xFF;
+	eitServiceInfo->eitDescriptor.ISO639LanguageCode = eitServiceInfo->eitDescriptor.ISO639LanguageCode & 0x0FFF;
+
+	//event name length
+	lower8Bits = (uint8_t) (*(pointer + 5));
+    eitServiceInfo->eitDescriptor.eventNameLength = lower8Bits & 0xFF;
+
+	memset(eitServiceInfo->eitDescriptor.eventNameChar, '\0', 512 * sizeof(char));
+	//event name char
+	int nameIterator;
+	for(nameIterator = 0; nameIterator < eitServiceInfo->eitDescriptor.eventNameLength; nameIterator++)
+	{
+		eitServiceInfo->eitDescriptor.eventNameChar[nameIterator] = (uint8_t) (*(pointer + 6 + nameIterator));
+	}
+		
+	//text length
+	lower8Bits = (uint8_t) (*(pointer + 5 + nameIterator + 1));
+    eitServiceInfo->eitDescriptor.textLength = lower8Bits & 0xFF;
+
+	memset(eitServiceInfo->eitDescriptor.textChar, '\0', 512 * sizeof(char));
+	//text char
+	int textIterator;
+	for(textIterator = 0; textIterator < eitServiceInfo->eitDescriptor.textLength; textIterator++)
+	{
+		if(*(pointer + 6 + nameIterator + textIterator) != '\0')
+		{
+			eitServiceInfo->eitDescriptor.textChar[textIterator] = (uint8_t) (*(pointer + 6 + nameIterator + textIterator + 1));
+		}
+	}
+
+	printf("Samo opis serije da se isprinta %s\n", eitServiceInfo->eitDescriptor.textChar);
+
+	eitServiceInfoBuffer += 12 + eitServiceInfo->descriptorsLoopLength;
+	(*parsedLen) += 12 + eitServiceInfo->descriptorsLoopLength;	
+	//printf("CurrentBusPro i parseLen iz funkcije za parsiranje: %d %d\n", eitServiceInfoBuffer, (*parsedLen));
+
+
+
+
+	}
+	else
+	{
+
+		printf("\n\nStigao 0x54\n");
+	}
+
+
+
+}
+*/
