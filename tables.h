@@ -7,7 +7,7 @@
 
 #define TABLES_MAX_NUMBER_OF_PIDS_IN_PAT    20 	    /* Max number of PMT pids in one PAT table */
 #define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20      /* Max number of elementary pids in one PMT table */
-#define MAX_NUM_OF_SERVICES 20						/* Used for EIT tables */
+#define TABLES_MAX_NUMBER_OF_EVENTS_IN_EIT  20		/* Max number of event info in EIT table */
 
 /**
  * @brief Enumeration of possible tables parser error codes
@@ -89,58 +89,106 @@ typedef struct _PmtTable
     uint8_t elementaryInfoCount;
 }PmtTable;
 
-/* a structure that respresents eit table header*/
-typedef struct _EitTableHeader
-{
-    uint8_t     tableId;                            /* The type of table */
-    uint8_t     sectionSyntaxIndicator;             /* The format of the table section to follow */
-    uint16_t    sectionLength;                      /* The length of the table section beyond this field */
-	uint16_t	serviceId;
-    uint8_t     versionNumber;                      /* The version number the private table section */
-	uint8_t     currentNextIndicator;               /* Signals what a particular table will look like when it next changes */
-    uint8_t     sectionNumber;                      /* Section number */
-    uint8_t     lastSectionNumber;                  /* Signals the last section that is valid for a particular MPEG-2 private table */	
-	uint16_t    transportStreamId;                  /* Transport stream identifier */
-	uint16_t	originalNetworkId;
-	uint8_t		segmentLastSectionNumber;
-	uint8_t		lastTableId;
+/**
+ * @brief Structure that defines EIT Table Header
+ */
+typedef struct _EitHeader{
+    uint8_t     tableId;
+    uint8_t     sectionSyntaxIndicator;
+    uint16_t    sectionLength;
+    uint16_t    serviceId;
+    uint8_t     versionNumber;
+    uint8_t     currentNextIndicator;
+    uint8_t     sectionNumber;
+    uint8_t     lastSectionNumber;
+    uint16_t    transportStreamId;
+    uint16_t    originalNetworkId;
+    uint8_t     segmentLastSectionNumber;
+    uint8_t     lastTabeId;
 }EitHeader;
 
-typedef struct _EitDescriptor
-{
-	uint8_t descriptorTag;
-	uint8_t descriptorLength;
-	uint32_t ISO639LanguageCode;
-	uint8_t eventNameLength;
-	char eventNameChar[512];
-	uint8_t textLength;
-	char textChar[512];
-}EitDescriptor;
+/**
+ * @brief Structure that defines EIT Short Event Descriptor
+ */
+typedef struct _Short_Event_Descriptor{
+	uint8_t		descriptorTag;
+	uint8_t		descriptorLength;
+	uint32_t	Iso639LanguageCode;
+	uint8_t		eventNameLength;
+	char		eventName[256];
+}Short_Event_Descriptor;
 
-/*a structure that represents eit table section which contains service information*/
-typedef struct _EitServiceInfo
-{    
-	uint16_t eventId;
-	uint64_t startTime;
-	uint32_t duration;
-	uint8_t runningStatus;
-	uint8_t freeCAMode;
-	uint16_t descriptorsLoopLength;
-	EitDescriptor eitDescriptor;	
-}EitServiceInfo;
+/**
+ * @brief Structure that defines EIT event info
+ */
+typedef struct _EitEventInfo{
+	uint16_t 	eventId;
+	uint8_t 	startTime[5];
+	uint8_t		duration[3];
+	uint8_t		runningStatus;
+	uint8_t		freeCaMode;
+	uint16_t	descriptorsLoopLength;
+	Short_Event_Descriptor	shortEventDescriptor;
+}EitEventInfo;
 
-/*a structure that respresents an entire parsed eit table*/
-typedef struct _EitTable
-{    
-    EitHeader eitHeader;                                        /* EIT Table Header */
-    EitServiceInfo eitServiceInfoArray[MAX_NUM_OF_SERVICES];    /* Services info presented in EIT table */
-    uint8_t serviceInfoCount;                                   /* Number of services info presented in EIT table */
+/**
+ * @brief Structure that defines EIT table
+ */
+typedef struct  _EitTable{
+    EitHeader       eitHeader;
+    EitEventInfo    eitEventInfoArray[TABLES_MAX_NUMBER_OF_EVENTS_IN_EIT];
+	uint8_t 		eventInfoCount;
 }EitTable;
 
-/*parsing eit header*/
+
+typedef struct _CurrentEventsInfo{
+    uint16_t    serviceId;
+	uint8_t 	startTime[5];
+	char		eventName[256];
+}CurrentEventsInfo;
+
+/**
+ * @brief Parse EIT header
+ *
+ * @param [in]  eitHeaderBuffer - Buffer that contains EIT header
+ * @param [out] eitHeader - EIT table header
+ * @return tables error code
+ */
 ParseErrorCode parseEitHeader(const uint8_t* eitHeaderBuffer, EitHeader* eitHeader);
-ParseErrorCode parseEitServiceInfo(const uint8_t* eitServiceInfoBuffer, EitServiceInfo* eitServiceInfo, uint32_t* parsedLen);
+
+/**
+ * @brief Parse EIT event info
+ *
+ * @param [in]  eitEventInfoBuffer - Buffer that contains eit event info
+ * @param [out] eitEventInfo - EIT event info
+ * @return tables error code
+ */
+ParseErrorCode parseEitEventInfo(const uint8_t* eitEventInfoBuffer, EitEventInfo* eitEventInfo);
+
+/**
+ * @brief Parse EIT short event descriptor
+ *
+ * @param [in]  shortEventDescriptorBuffer - Buffer that contains eit short event descriptor
+ * @param [out] eitEventInfo - EIT event info
+ * @return tables error code
+ */
+ParseErrorCode parseShortEventDescriptor(const uint8_t* shortEventDescriptorBuffer, EitEventInfo* eitEventInfo);
+
+/**
+ * @brief Parse EIT table
+ *
+ * @param [in]  eitSectionBuffer - Buffer that contains EIT table section
+ * @param [out] eitTable - EIT table
+ * @return tables error code
+ */
 ParseErrorCode parseEitTable(const uint8_t* eitSectionBuffer, EitTable* eitTable);
+
+/**
+ * @brief Print EIT table
+ *
+ * @param [in] eitTable - EIT table to print
+ * @return tables error code
+ */
 ParseErrorCode printEitTable(EitTable* eitTable);
 
 

@@ -467,10 +467,10 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		//printf("\n%s -----EIT TABLE ARRIVED-----\n",__FUNCTION__);
 		if(parseEitTable(buffer,eitTable)==TABLES_PARSE_OK)
         {
-            //printEitTable(eitTable);
+            printEitTable(eitTable);
 			/* Punim strukturu */
 			
-			eitBufferFilling(eitTable);
+			//eitBufferFilling(eitTable);
 
 			/* Punim strukturu */
             pthread_mutex_lock(&demuxMutex);
@@ -543,9 +543,8 @@ void eitBufferFilling(EitTable* eitTableElement)
 	 	//printf("Vrednost za programNumber u petlji je: %d\n",eitBuffer[i].programNumber);		
 		if(eitBuffer[i].programNumber == eitTable->eitHeader.serviceId)
 		{
-			//printf("Vrednost za eitBuffer[i].programNumber u petlji je: %d\n", eitBuffer[i].programNumber);		
-			//zameni
-			strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
+			
+			//strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
 			/* TODO: URADI ZA ZANAR!! */
 			infoFound = 1;
 			break;
@@ -558,7 +557,7 @@ void eitBufferFilling(EitTable* eitTableElement)
 			if(eitBuffer[i].programNumber == 0)
 			{
 				eitBuffer[i].programNumber = eitTable->eitHeader.serviceId;
-				strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
+				//strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
 				/* TODO: URADI ZA ZANAR!! */
 				break;
 			}
