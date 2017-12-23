@@ -420,6 +420,11 @@ ParseErrorCode parseShortEventDescriptor(const uint8_t* shortEventDescriptorBuff
 			eitEventInfo->shortEventDescriptor.eventName[eitEventInfo->shortEventDescriptor.eventNameLength] = '\0';
 			return TABLES_PARSE_OK;
 		}
+		else if(shortEventDescriptorBuffer[parsedCount] == 0x54)
+		{
+			printf("\n\nRADI!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n\n");
+		}
+	
 		parsedCount = parsedCount + (2 + shortEventDescriptorBuffer[parsedCount + 1]);
 	}
 	return TABLES_PARSE_OK;

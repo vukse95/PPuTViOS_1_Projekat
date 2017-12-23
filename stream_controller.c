@@ -1,5 +1,7 @@
 #include "stream_controller.h"
 
+#define VOLUME_SCALE 160400000
+
 static PatTable *patTable;
 static PmtTable *pmtTable;
 static EitTable *eitTable;
@@ -19,6 +21,7 @@ static uint32_t streamHandleA = 0;
 static uint32_t streamHandleV = 0;
 static uint32_t filterHandle = 0;
 static uint8_t threadExit = 0;
+
 
 static bool changeChannel = false;
 static int16_t programNumber = 0;
@@ -47,6 +50,8 @@ StreamControllerError streamControllerInit(InputConfig inputConfig)
 	
 	inputConfigFromApp = inputConfig;
 	programNumber = inputConfigFromApp.programNumber;
+
+	setVolume(5);
 
     return SC_NO_ERROR;
 }
@@ -467,7 +472,7 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		//printf("\n%s -----EIT TABLE ARRIVED-----\n",__FUNCTION__);
 		if(parseEitTable(buffer,eitTable)==TABLES_PARSE_OK)
         {
-            printEitTable(eitTable);
+            //printEitTable(eitTable);
 			/* Punim strukturu */
 			
 			//eitBufferFilling(eitTable);
@@ -567,4 +572,9 @@ void eitBufferFilling(EitTable* eitTableElement)
 	//printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
 	//printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
 
+}
+
+void setVolume(uint8_t volume)
+{
+	Player_Volume_Set(playerHandle, volume * VOLUME_SCALE);
 }

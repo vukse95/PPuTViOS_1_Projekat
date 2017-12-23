@@ -116,6 +116,7 @@ int main(int argc, char *argv[])
 
     /* deinitialize stream controller module */
     ERRORCHECK(streamControllerDeinit());
+	
   
     return 0;
 }
@@ -208,6 +209,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 				if(osd->volume >=0 && osd->volume < 10)
 				{
 					osd->volume++;
+					setVolume(osd->volume);
 					/* TODO: Povecati volume na set top-boxu */
 				}
 				break;
@@ -217,6 +219,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 				if(osd->volume > 0 && osd->volume <= 10)
 				{
 					osd->volume--;
+					setVolume(osd->volume);
 					/* TODO: Smanjiti volume na set top-boxu */
 				}
 				break;
@@ -228,10 +231,12 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 					mutedVolume = osd->volume;
 					osd->volume = 0;
 					mutePressed = 1;
+					setVolume(osd->volume);
 				}
 				else if(mutePressed == 1)
 				{
 					osd->volume = mutedVolume;
+					setVolume(mutedVolume);
 					mutePressed = 0;
 				}
 				osd->drawVolume = 1;

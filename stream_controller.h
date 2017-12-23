@@ -105,4 +105,8 @@ eitBufferElement* eitTableGet();
 
 void eitBufferFilling(EitTable* eitTableElement);
 
+/* TODO:Napisati dokumentaciju */
+
+void setVolume(uint8_t volume);
+
 #endif /* __STREAM_CONTROLLER_H__ */
