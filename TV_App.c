@@ -210,7 +210,6 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 				{
 					osd->volume++;
 					setVolume(osd->volume);
-					/* TODO: Povecati volume na set top-boxu */
 				}
 				break;
 			case KEYCODE_VOL_DOWN:
@@ -220,12 +219,10 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 				{
 					osd->volume--;
 					setVolume(osd->volume);
-					/* TODO: Smanjiti volume na set top-boxu */
 				}
 				break;
 			case KEYCODE_MUTE:
 				printf("\nMUTE pressed\n");
-				/* TODO: MUTE odraditi i na set top-boxu */
 				if(mutePressed == 0)
 				{
 					mutedVolume = osd->volume;
@@ -247,7 +244,6 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 			    pthread_cond_signal(&deinitCond);
 			    pthread_mutex_unlock(&deinitMutex);
 				break;
-			/* TODO: Odraditi za volume i za mute! */
 			default:
 				printf("\nPress P+, P-, info or exit! \n\n");
 		}
@@ -284,7 +280,7 @@ int configFileRead(char fileName[])
 	/* getline bugs occasionally, replace! */
 	while((read = getline(&lineBuffer, &bufferSize, filePtr)) != -1)
 	{
- 		/* Check if first char is '#' thats is comment or empty line */
+ 		/* Check if first char is '#' that is comment or empty line */
 		if(lineBuffer[0] != '#' && lineBuffer != '\0')
 		{
 			if(strstr(lineBuffer, "Freq") != NULL)

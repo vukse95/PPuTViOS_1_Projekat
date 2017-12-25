@@ -391,7 +391,7 @@ ParseErrorCode parseEitEventInfo(const uint8_t* eitEventInfoBuffer, EitEventInfo
 ParseErrorCode parseShortEventDescriptor(const uint8_t* shortEventDescriptorBuffer, EitEventInfo* eitEventInfo)
 {
 	uint8_t parsedCount = 0;
-	uint8_t currentPosition = 0;
+	//uint8_t currentPosition = 0;
 	uint8_t i = 0;
 
 	if(shortEventDescriptorBuffer == NULL || eitEventInfo == NULL){

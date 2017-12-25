@@ -1,4 +1,5 @@
 #include "osd_graphics.h"
+
 #include <directfb.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -21,34 +22,73 @@ if (err != DFB_OK)                                          \
   }                                                         \
 }
 
+/* DirectFB variables */
 static IDirectFBSurface* primary = NULL;
 static IDirectFB* dfbInterface = NULL;
 static DFBSurfaceDescription surfaceDesc;
+
+/* Screen size */
 static int screenWidth;
 static int screenHeight;
 
+/* Volume logo parameters */
 static IDirectFBImageProvider* provider = NULL;
 static IDirectFBSurface* logoSurface = NULL;
 static int32_t logoWidth;
 static int32_t logoHeight;
 
-static struct itimerspec timerSpec;
-static struct itimerspec timerSpecOld;
-int32_t timerFlags;
-timer_t timerId;
+/* Program timer variables */
+static struct itimerspec timerSpecProgram;
+static struct itimerspec timerSpecOldProgram;
+int32_t timerFlagsProgram;
+timer_t timerIdProgram;
 
-static pthread_t gcThread;
+/* Volume timer variables */
+static struct itimerspec timerSpecVolume;
+static struct itimerspec timerSpecOldVolume;
+int32_t timerFlagsVolume;
+timer_t timerIdVolume;
+
+/* OSD thread  variables */
+static pthread_t osdThread;
 static int32_t threadExit;
 
+/* OsdGraphicsInfo structure local instance */
 static OsdGraphicsInfo OsdInfo;
 
-static void* graphicControllerTask(void* params);
-static void timerInit(void);
-static void clearScreen(void);
+/**
+ * @brief - OSD thread.
+ *
+ * @param params
+ *
+ * @return 
+ */
+static void* OSDTask(void* params);
 
+
+/**
+ * @brief - Initialize program timer.
+ */
+static void timerInitProgram(void);
+
+/**
+ * @brief - Program timer callback which removes everything related to program info from the screen.
+ */
+static void clearScreenProgram(void);
+
+/**
+ * @brief - Initialize volume timer.
+ */
+static void timerInitVolume(void);
+
+/**
+ * @brief - Volume timer callback which removes everything related to volume info from the screen.
+ */
+static void clearScreenVolume(void);
 OsdGraphicsError OsdInit(void) 
 {
-    if (pthread_create(&gcThread, NULL, &graphicControllerTask, NULL))
+	/* Create OSD thread */
+    if (pthread_create(&osdThread, NULL, &OSDTask, NULL))
     {
         printf("Error creating OSD thread\n");
         return OSD_ERROR;
@@ -57,62 +97,91 @@ OsdGraphicsError OsdInit(void)
     return OSD_NO_ERROR;
 }
 
-void timerInit(void)
+void timerInitProgram(void)
 {
     struct sigevent signalEvent;
 
     /* set sigevent callback */
     signalEvent.sigev_notify = SIGEV_THREAD;
-    signalEvent.sigev_notify_function = (void*)clearScreen;
+    signalEvent.sigev_notify_function = (void*)clearScreenProgram;
     signalEvent.sigev_value.sival_ptr = NULL;
     signalEvent.sigev_notify_attributes = NULL;
-    timer_create(CLOCK_REALTIME, &signalEvent, &timerId);
+    timer_create(CLOCK_REALTIME, &signalEvent, &timerIdProgram);
 }
 
-void* graphicControllerTask(void* params)
+void timerInitVolume(void)
+{
+    struct sigevent signalEvent;
+
+    /* set sigevent callback */
+    signalEvent.sigev_notify = SIGEV_THREAD;
+    signalEvent.sigev_notify_function = (void*)clearScreenVolume;
+    signalEvent.sigev_value.sival_ptr = NULL;
+    signalEvent.sigev_notify_attributes = NULL;
+    timer_create(CLOCK_REALTIME, &signalEvent, &timerIdVolume);
+}
+
+void* OSDTask(void* params)
 {
     IDirectFBFont* fontInterface = NULL;
     DFBFontDescription fontDesc;
     char channelString[4];
     char audioPidString[50];
     char videoPidString[50];
+	char teletext[] = "Teletext available";
+	char noTeletext[] = "Teletext not available";
 
-    /* initialize timer */
-    timerInit();
+	//memset(&OsdInfo, 0, sizeof(OsdInfo));
+	
+    /* Initialize timer */
+	timerInitProgram();
+	timerInitVolume();
 
-    /* initialize directFB */
+    /* Initialize directFB */
     DFBCHECK(DirectFBInit(NULL, NULL));
 
-    /* fetch the directFB interface */
+    /* Fetch the directFB interface */
     DFBCHECK(DirectFBCreate(&dfbInterface));
 
-    /* set full screen */
+    /* Set full screen */
     DFBCHECK(dfbInterface->SetCooperativeLevel(dfbInterface, DFSCL_FULLSCREEN));
 
-    /* create primary surface with double buffering */
+    /* Create primary surface with double buffering */
     surfaceDesc.flags = DSDESC_CAPS;
     surfaceDesc.caps = DSCAPS_PRIMARY | DSCAPS_FLIPPING;
     dfbInterface->CreateSurface(dfbInterface, &surfaceDesc, &primary);
 
-    /* fetch the screen size */
+    /* Fetch the screen size */
     DFBCHECK(primary->GetSize(primary, &screenWidth, &screenHeight));
 
     while (threadExit == 0)
     {
+        /* check whether the screen should be black */
+        if (OsdInfo.drawBlack == 1)
+        {
+            DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff));
+            DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
+        } 
+        else
+        {
+            DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00));
+            DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
+        }
+
+        /* if the draw flag has been set, draw the info banner */
         if (OsdInfo.draw == 1)
         {
-            OsdInfo.draw = 0;
+            usleep(300000);
 
-            /* check whether the screen should be black */
-            if (OsdInfo.drawBlack == 1)
+            /* set the timer to 3 seconds */
+            if (OsdInfo.timerSetProgram == 0)
             {
-                DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff));
-                DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
-            } 
-            else
-            {
-                DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00));
-                DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
+                memset(&timerSpecProgram, 0, sizeof(timerSpecProgram));
+                timerSpecProgram.it_value.tv_sec = 3;
+                timerSpecProgram.it_value.tv_nsec = 0;
+                timer_settime(timerIdProgram, timerFlagsProgram, &timerSpecProgram, &timerSpecOldProgram);
+
+                OsdInfo.timerSetProgram = 1;
             }
 
             /* draw channel rectangle */
@@ -144,29 +213,36 @@ void* graphicControllerTask(void* params)
             DFBCHECK(primary->DrawString(primary, audioPidString, -1, screenWidth / 2 - 470, screenHeight * 6 / 8 + 50, DSTF_LEFT));
             DFBCHECK(primary->DrawString(primary, videoPidString, -1, screenWidth / 2 - 470, screenHeight * 6 / 8 + 100, DSTF_LEFT));            
 
-            /* set the timer to 5 seconds */
-            memset(&timerSpec, 0, sizeof(timerSpec));
-            timerSpec.it_value.tv_sec = 5;
-            timerSpec.it_value.tv_nsec = 0;
-            timer_settime(timerId, timerFlags, &timerSpec, &timerSpecOld);
+            /* draw teletext if the channel has it */
+            if (OsdInfo.hasTeletext == 1)
+            {
+                DFBCHECK(primary->DrawString(primary, teletext, -1, screenWidth / 2 - 50, screenHeight * 6 / 8 + 50, DSTF_LEFT));
+            }
+            else
+            {
+                DFBCHECK(primary->DrawString(primary, noTeletext, -1, screenWidth / 2 - 50, screenHeight * 6 / 8 + 50, DSTF_LEFT));
+            }
 
-            /* flip the buffers */
-            DFBCHECK(primary->Flip(primary, NULL, 0));
+            if (strlen(OsdInfo.eventName) > 1 && strlen(OsdInfo.eventGenre) > 1)
+            {
+                /* draw name and genre rectangle */
+                DFBCHECK(primary->SetColor(primary, 0x03, 0x03, 0xff, 0xff));
+                DFBCHECK(primary->FillRectangle(primary, screenWidth / 2 - 500, screenHeight * 5 / 8, 1000, screenHeight / 8 - 20));
+
+                /* draw name and genre */
+                DFBCHECK(primary->SetColor(primary, 0xff, 0x03, 0x03, 0xff));
+                DFBCHECK(primary->DrawString(primary, OsdInfo.eventName, -1, screenWidth / 2 - 470, screenHeight * 5 / 8 + 50, DSTF_LEFT));
+                DFBCHECK(primary->DrawString(primary, OsdInfo.eventGenre, -1, screenWidth / 2 - 470, screenHeight * 5 / 8 + 100, DSTF_LEFT));
+            }
         }
 
+        /* if the draw volume has been set, draw volume logo */
         if (OsdInfo.drawVolume == 1)
         {
             char volumePicture[50];
 
-            OsdInfo.drawVolume = 0;
-
-            /* blank screen */
-            primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00);
-            primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
-
             /* set the picture file */
             sprintf(volumePicture, "volume_%d.png", OsdInfo.volume);
-            printf("%s\n", volumePicture);
 
             /* create image provider */
             DFBCHECK(dfbInterface->CreateImageProvider(dfbInterface, volumePicture, &provider));
@@ -180,27 +256,34 @@ void* graphicControllerTask(void* params)
             DFBCHECK(logoSurface->GetSize(logoSurface, &logoWidth, &logoHeight));
             DFBCHECK(primary->Blit(primary, logoSurface, NULL, screenWidth - 200, 0));
 
-            /* set the timer to 5 seconds */
-            memset(&timerSpec, 0, sizeof(timerSpec));
-            timerSpec.it_value.tv_sec = 5;
-            timerSpec.it_value.tv_nsec = 0;
-            timer_settime(timerId, timerFlags, &timerSpec, &timerSpecOld);
+            /* set the timer to 3 seconds */
+            if (OsdInfo.timerSetVolume == 0)
+            {
+                memset(&timerSpecVolume, 0, sizeof(timerSpecVolume));
+                timerSpecVolume.it_value.tv_sec = 3;
+                timerSpecVolume.it_value.tv_nsec = 0;
+                timer_settime(timerIdVolume, timerFlagsVolume, &timerSpecVolume, &timerSpecOldVolume);
 
-            /* flip the buffers */
-            DFBCHECK(primary->Flip(primary, NULL, 0));
+                OsdInfo.timerSetVolume = 1;
+            }
         }
-		usleep(100000);
+
+        DFBCHECK(primary->Flip(primary, NULL, 0));
+        usleep(100000);
     }
 }
 
 OsdGraphicsError OsdDeinit(void)
-{
+{	
+	/* Thread join */
     threadExit = 1;
-    if (pthread_join(gcThread, NULL))
+    if (pthread_join(osdThread, NULL))
     {
         printf("\n%s : Error! Pthread join failed!\n", __FUNCTION__);
         return OSD_ERROR;
     }
+	
+	/* Release allocated DirectFB memory */
     primary->Release(primary);
     dfbInterface->Release(dfbInterface);
 
@@ -212,18 +295,16 @@ OsdGraphicsInfo* getOsdInfo(void)
     return &OsdInfo;
 }
 
-void clearScreen(void)
+void clearScreenProgram(void)
 {
-    /* clear the screen callback */
-    if (OsdInfo.drawBlack == 0)
-    {
-        primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00);
-        primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
-    }
-    else
-    {
-        primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff);
-        primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight);
-    }
-    primary->Flip(primary, NULL, 0);
+    /* Reset the timer and clear the info banner from the screen */
+    OsdInfo.draw = 0;
+    OsdInfo.timerSetProgram = 0;
+}
+
+void clearScreenVolume(void)
+{
+    /* Reset the timer and clear the volume logo from the screen */
+    OsdInfo.drawVolume = 0;
+    OsdInfo.timerSetVolume = 0;
 }

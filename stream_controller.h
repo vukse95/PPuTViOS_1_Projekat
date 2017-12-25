@@ -1,21 +1,19 @@
 #ifndef __STREAM_CONTROLLER_H__
 #define __STREAM_CONTROLLER_H__
 
-#include <stdio.h>
 #include "tables.h"
 #include "tdp_api.h"
 #include "tables.h"
 #include "pthread.h"
+
+#include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
 #include <errno.h>
 #include <stdbool.h>
 #include <string.h>
 
-/* Change ERROR message to be by structure not define */
-#define DESIRED_FREQUENCY 754000000	        /* Tune frequency in Hz */
-#define BANDWIDTH 8    				        /* Bandwidth in Mhz */
-#define MODULE_NAME_SIZE 8					/* example DVB-T2 */
+#define VOLUME_SCALE 160400000
 
 typedef struct _Config
 {

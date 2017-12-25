@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <pthread.h>
 
-
+/* Remote controller keycode values */
 #define KEYCODE_1 2
 #define KEYCODE_2 3
 #define KEYCODE_3 4
@@ -30,7 +30,7 @@
 #define KEYCODE_VOL_DOWN 64
 #define KEYCODE_MUTE 60
 
-/* input event values for 'EV_KEY' type */
+/* Input event values for 'EV_KEY' type */
 #define EV_VALUE_RELEASE    0
 #define EV_VALUE_KEYPRESS   1
 #define EV_VALUE_AUTOREPEAT 2

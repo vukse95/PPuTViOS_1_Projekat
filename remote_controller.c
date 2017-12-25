@@ -1,11 +1,31 @@
 #include "remote_controller.h"
 
+/* Remote controller device file */
 static int32_t inputFileDesc;
-static void* inputEventTask();
-static int32_t getKey(uint8_t* buf);
+
+/* Remote controller thread  variables */
 static pthread_t remote;
 static uint8_t threadExit = 0;
+
 static RemoteControllerCallback callback = NULL;
+
+/**
+ * @brief - Gets the remote controller events.
+ *
+ * @param buf - Events buffer.
+ *
+ * @return - Remote controller error code.
+ */
+static int32_t getKey(uint8_t* buf);
+
+/**
+ * @brief - Remote controller module thread function.
+ *
+ * @param params
+ *
+ * @return 
+ */
+static void* inputEventTask();
 
 RemoteControllerError remoteControllerInit()
 {
@@ -55,7 +75,7 @@ void* inputEventTask()
 {
     char deviceName[20];
     struct input_event eventBuf;
-    int32_t counter = 0;
+    //int32_t counter = 0;
     const char* dev = "/dev/input/event0";
     
     inputFileDesc = open(dev, O_RDWR);

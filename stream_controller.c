@@ -1,6 +1,5 @@
 #include "stream_controller.h"
 
-#define VOLUME_SCALE 160400000
 
 static PatTable *patTable;
 static PmtTable *pmtTable;
@@ -320,11 +319,11 @@ void* streamControllerTask()
     /* lock to frequency */
     if(!Tuner_Lock_To_Frequency(inputConfigFromApp.frequency, inputConfigFromApp.bandwidth, inputConfigFromApp.module))
     {
-        printf("\n%s: INFO Tuner_Lock_To_Frequency(): %d Hz - success!\n",__FUNCTION__,DESIRED_FREQUENCY);
+        printf("\n%s: INFO Tuner_Lock_To_Frequency(): %d Hz - success!\n",__FUNCTION__,inputConfigFromApp.frequency);
     }
     else
     {
-        printf("\n%s: ERROR Tuner_Lock_To_Frequency(): %d Hz - fail!\n",__FUNCTION__,DESIRED_FREQUENCY);
+        printf("\n%s: ERROR Tuner_Lock_To_Frequency(): %d Hz - fail!\n",__FUNCTION__,inputConfigFromApp.frequency);
         free(patTable);
         free(pmtTable);
 		free(eitTable);
@@ -424,7 +423,7 @@ void changeChannelExtern(int16_t channelNumber)
 int32_t sectionReceivedCallback(uint8_t *buffer)
 {
     uint8_t tableId = *buffer;
-	int i;
+	//int i;
  
     if(tableId==0x00)
     {
@@ -447,9 +446,10 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
 		//printf("\neitBufferCALLBACK:%d\n", sizeof(eitBuffer[0]));
 		//printf("\nbufferElementCALLBACK:%d\n", sizeof(eitBufferElement));
 		
-		//memset(eitBuffer.programNumber, -1, sizeof(eitBuffer));
+		//memset(eitBuffer->programNumber, 0, sizeof(eitBuffer));
 	
 		/* Init eitBuffer */
+		int i;
 		for(i = 0; i < eitBufferSize; i++)
 		{
 			eitBuffer[i].programNumber = 0;
