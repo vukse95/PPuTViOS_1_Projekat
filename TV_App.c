@@ -34,6 +34,8 @@ static InputConfig configInputConfig;
 int configFileRead(char fileName[]);
 void timeOutChannelTrigger();
 
+static void registerProgramType(int16_t type);
+
 /* Remote controller key change timeout timer */
 static timer_t keyTimer;
 static struct itimerspec timerSpec;
@@ -98,6 +100,9 @@ int main(int argc, char *argv[])
     
     /* initialize stream controller module */
     ERRORCHECK(streamControllerInit(configInputConfig));
+
+	/* register program type callback */
+	ERRORCHECK(registerProgramTypeCallback(registerProgramType));
 
     /* wait for a EXIT remote controller key press event */
     pthread_mutex_lock(&deinitMutex);
@@ -447,7 +452,22 @@ void timeOutChannelTrigger()
 	}
 }
 
-
+void registerProgramType(int16_t type)
+{
+	OsdGraphicsInfo* osd = getOsdInfo();
+	if (type == -1)
+	{
+		printf("NASAO RADIO!");
+		osd->drawBlack = 1;
+		osd->drawRadio = 1;
+	}
+	else
+	{
+		osd->drawBlack = 0;
+		osd->drawRadio = 0;
+		printf("NEMA RADIA!");
+	}
+}
 
 
 

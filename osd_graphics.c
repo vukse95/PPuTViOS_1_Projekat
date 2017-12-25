@@ -167,6 +167,24 @@ void* OSDTask(void* params)
             DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0x00));
             DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth, screenHeight));
         }
+		
+
+		if(OsdInfo.drawRadio == 1)
+		{
+			 /* specify the height of the font by raising the appropriate flag and setting the height value */
+	fontDesc.flags = DFDESC_HEIGHT;
+	fontDesc.height = 48;
+	
+    /* create the font and set the created font for primary surface text drawing */
+	DFBCHECK(dfbInterface->CreateFont(dfbInterface, "/home/galois/fonts/DejaVuSans.ttf", &fontDesc, &fontInterface));
+	DFBCHECK(primary->SetFont(primary, fontInterface));
+	
+	DFBCHECK(primary->SetColor(primary, 0x00, 0xa6, 0x51, 0xff));    
+
+    /* draw the text */
+	DFBCHECK(primary->DrawString(primary, "RADIO", -1, screenWidth / 2 - 15, screenHeight / 2, DSTF_LEFT));
+             
+	}		
 
         /* if the draw flag has been set, draw the info banner */
         if (OsdInfo.draw == 1)

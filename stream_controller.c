@@ -13,6 +13,7 @@ static pthread_mutex_t statusMutex = PTHREAD_MUTEX_INITIALIZER;
 
 static int32_t sectionReceivedCallback(uint8_t *buffer);
 static int32_t tunerStatusCallback(t_LockStatus status);
+static ProgramTypeCallback programType = NULL;
 
 static uint32_t playerHandle = 0;
 static uint32_t sourceHandle = 0;
@@ -237,6 +238,8 @@ void startChannel(int32_t channelNumber)
             streamControllerDeinit();
         }
     }
+	
+	programType(videoPid);
 
     if (audioPid != -1)
     {   
@@ -592,6 +595,21 @@ void eitBufferFilling(EitTable* eitTableElement)
 	//printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
 	//printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
 
+}
+
+StreamControllerError registerProgramTypeCallback(ProgramTypeCallback programTypeCallback)
+{
+	if (programTypeCallback == NULL)
+	{
+		printf("Error registring volume callback!\n");
+		return SC_ERROR;
+	}
+	else
+	{
+		printf("Volume callback function registered!\n");
+		programType = programTypeCallback;
+		return SC_NO_ERROR;
+	}
 }
 
 void setVolume(uint8_t volume)

@@ -27,6 +27,7 @@ typedef struct _OsdGraphicsInfo
 	char eventName[50];
     uint8_t drawBlack;
     uint8_t draw;
+	uint8_t drawRadio;
     uint8_t drawVolume;
 	uint8_t timerSetVolume;
 	uint8_t timerSetProgram; 

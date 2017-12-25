@@ -93,6 +93,16 @@ StreamControllerError channelDown();
  */
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 
+typedef void(*ProgramTypeCallback)(int16_t type);
+
+/*
+ * @brief Video pid callback
+ *
+ * @param  [in]  programTypeCallback - pointer to registerProgramTypeCallback function
+ * @return Stream controller error code
+ */
+StreamControllerError registerProgramTypeCallback(ProgramTypeCallback programTypeCallback);
+
 /* TODO:Napisati dokumentaciju */
 uint8_t getNumberOfChannels();
 
