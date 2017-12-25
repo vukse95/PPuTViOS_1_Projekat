@@ -586,3 +586,8 @@ void setVolume(uint8_t volume)
 {
 	Player_Volume_Set(playerHandle, volume * VOLUME_SCALE);
 }
+
+uint8_t getNumberOfChannels()
+{
+	return patTable->serviceInfoCount - 1;
+}

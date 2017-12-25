@@ -91,7 +91,8 @@ StreamControllerError channelDown();
  */
 StreamControllerError getChannelInfo(ChannelInfo* channelInfo);
 
-
+/* TODO:Napisati dokumentaciju */
+uint8_t getNumberOfChannels();
 
 /* TODO:Napisati dokumentaciju */
 void changeChannelExtern(int16_t channelNumber);

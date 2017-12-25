@@ -34,6 +34,7 @@ static InputConfig configInputConfig;
 int configFileRead(char fileName[]);
 void timeOutChannelTrigger();
 
+/* Remote controller key change timeout timer */
 static timer_t keyTimer;
 static struct itimerspec timerSpec;
 static struct itimerspec timerSpecOld;
@@ -73,6 +74,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	/* Timer init */
 	signalEvent.sigev_notify = SIGEV_THREAD;
 	signalEvent.sigev_notify_function = timeOutChannelTrigger;
 	signalEvent.sigev_value.sival_ptr = NULL;
@@ -169,8 +171,9 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
     	            printf("Video pid: %d\n", channelInfo.videoPid);
 	   	            printf("Teletext status: %d\n", channelInfo.hasTeletext);
     	            printf("**********************************************************\n");
+					printf("BROJ KANALA:%d\n", getNumberOfChannels());
 					//printf("Name:%s\n", eitTable[]->name);					
-					eitTableGet();
+					//eitTableGet();
 
 					osd->audioPid = channelInfo.audioPid;
 					osd->videoPid = channelInfo.videoPid;
@@ -189,6 +192,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 					osd->audioPid = channelInfo.audioPid;
 					osd->videoPid = channelInfo.videoPid;
 					osd->channelNumber = channelInfo.programNumber;
+					osd->hasTeletext = channelInfo.hasTeletext;
 					osd->draw = 1;
 				}
 				break;
@@ -202,6 +206,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 					osd->audioPid = channelInfo.audioPid;
 					osd->videoPid = channelInfo.videoPid;
 					osd->channelNumber = channelInfo.programNumber;
+					osd->hasTeletext = channelInfo.hasTeletext;
 					osd->draw = 1;
 				}
 				break;
@@ -414,9 +419,19 @@ void timeOutChannelTrigger()
 		convertedKey += pressedKeys[2] - 1;
 
 	}
-	printf("\nUnet broj%d\n", convertedKey);
+	
+	if(convertedKey < 1)
+	{
+		convertedKey = 1;
+	}
+	else if(convertedKey > getNumberOfChannels())
+	{
+		convertedKey = getNumberOfChannels();
+	}
+	printf("\nUnet broj:%d\n", convertedKey);
 	fflush(stdout);
 	changeChannelExtern(convertedKey);
+
 	/* TODO: Odraditi bolje ako ostane vremena */
 	usleep(900000);
 	if (getChannelInfo(&channelInfo) == SC_NO_ERROR)
@@ -424,6 +439,7 @@ void timeOutChannelTrigger()
 		osd->audioPid = channelInfo.audioPid;
 		osd->videoPid = channelInfo.videoPid;
 		osd->channelNumber = channelInfo.programNumber;
+		osd->hasTeletext = channelInfo.hasTeletext;
 		osd->draw = 1;
 	}
 }
