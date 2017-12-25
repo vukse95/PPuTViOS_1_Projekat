@@ -182,20 +182,8 @@ void startChannel(int32_t channelNumber)
 	/* free PMT table filter */
 	Demux_Free_Filter(playerHandle, filterHandle);
     
-	/* set demux filter for receive EIT  actual TS present/following table of program */
-	if(Demux_Set_Filter(playerHandle, 0x0012, 0x4E, &filterHandle))
-	{
-		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
-		return;
-	}
-    
-	/* wait for a EIT table to be parsed*/
-	pthread_mutex_lock(&demuxMutex);
-	if (ETIMEDOUT == pthread_cond_wait(&demuxCond, &demuxMutex))
-	{
-		printf("\n%s : ERROR EIT parse timeout exceeded!\n", __FUNCTION__);
-	}
-	pthread_mutex_unlock(&demuxMutex);
+	//odavde premestio
+	
 	/*
 	printf("\n\nPAT broj:%d\n", patTable->patServiceInfoArray[channelNumber + 1].programNumber);
 	printf("\nEIT broj:%d\n\n\n", eitTable->eitHeader.serviceId);
@@ -263,6 +251,21 @@ void startChannel(int32_t channelNumber)
     currentChannel.programNumber = channelNumber + 1;
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
+
+	/* set demux filter for receive EIT  actual TS present/following table of program */
+	if(Demux_Set_Filter(playerHandle, 0x0012, 0x4E, &filterHandle))
+	{
+		printf("\n%s : ERROR Demux_Set_Filter() fail\n", __FUNCTION__);
+		return;
+	}
+    
+	/* wait for a EIT table to be parsed*/
+	pthread_mutex_lock(&demuxMutex);
+	if (ETIMEDOUT == pthread_cond_wait(&demuxCond, &demuxMutex))
+	{
+		printf("\n%s : ERROR EIT parse timeout exceeded!\n", __FUNCTION__);
+	}
+	pthread_mutex_unlock(&demuxMutex);
 }
 
 void* streamControllerTask()
