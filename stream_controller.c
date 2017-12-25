@@ -24,6 +24,8 @@ static uint8_t threadExit = 0;
 
 static bool changeChannel = false;
 static int16_t programNumber = 0;
+static char eventName[128];
+static char eventGenre[128];
 
 static ChannelInfo currentChannel;
 static bool isInitialized = false;
@@ -146,6 +148,8 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
     channelInfo->audioPid = currentChannel.audioPid;
     channelInfo->videoPid = currentChannel.videoPid;
 	channelInfo->hasTeletext = currentChannel.hasTeletext;
+	strcpy(channelInfo->eventName, eventName);
+	
     
     return SC_NO_ERROR;
 }
@@ -535,6 +539,13 @@ eitBufferElement* eitTableGet()
 			/* Nasao koji info treba da se prosledi */
 			printf("\n\nNumber:%d\n", eitBuffer[i].programNumber);
 			printf("\n\nName:%s", eitBuffer[i].name);
+
+			/* Clean eventName and eventGenre buffers */
+			memset(eventName, '\0', sizeof(eventName));
+			//memset(eventGenre, '\0', sizeof(eventGenre));
+
+			/* Puting info in temporary buffer */
+			strcpy(eventName, eitBuffer[i].name);
 		}
 	}	
 	

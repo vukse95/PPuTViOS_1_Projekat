@@ -43,6 +43,8 @@ typedef struct _ChannelInfo
     int16_t audioPid;
     int16_t videoPid;
 	int16_t hasTeletext;
+	char eventName[128];
+	char eventGenre[128];
 }ChannelInfo;
 
 /**
@@ -52,7 +54,7 @@ typedef struct _eitBufferElement
 {
     int16_t programNumber;
     char name[128];
-    char genre[64];
+    char genre[128];
 }eitBufferElement;
 
 /**

@@ -179,6 +179,8 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 					osd->videoPid = channelInfo.videoPid;
 					osd->channelNumber = channelInfo.programNumber;
 					osd->hasTeletext = channelInfo.hasTeletext;
+					strcpy(osd->eventName, channelInfo.eventName);
+					strcpy(osd->eventGenre, "Genre not implemented yet!");
 					osd->draw = 1;
     	        }
 				break;
