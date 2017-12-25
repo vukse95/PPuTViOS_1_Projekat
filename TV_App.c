@@ -187,7 +187,17 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 					
 					strcpy(osd->eventName, channelInfo.eventName);
 					strcpy(osd->eventGenre, "Genre not implemented yet!");
-					osd->draw = 1;
+				
+					/* Reset timer */
+					if(osd->timerSetProgram == 1 && osd->draw == 1)
+					{
+						osd->timerSetProgram = 0;
+						osd->draw = 1;
+					}
+					else
+					{
+						osd->draw = 1;
+					}
     	        }
 				break;
 			case KEYCODE_P_PLUS:
