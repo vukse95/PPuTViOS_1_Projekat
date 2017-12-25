@@ -79,8 +79,8 @@ int main(int argc, char *argv[])
 	signalEvent.sigev_notify_attributes = NULL;
 	timer_create(CLOCK_REALTIME, &signalEvent, &keyTimer);
 
-	printf("\nTimer init!\n");
-
+	//printf("\nTimer init!\n");
+	/* Set timer to 2 sec */
 	memset(&timerSpec, 0, sizeof(timerSpec));
 	timerSpec.it_value.tv_sec = 2;
 	timerSpec.it_value.tv_nsec = 0;
@@ -167,6 +167,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
     	            printf("Program number: %d\n", channelInfo.programNumber);
     	            printf("Audio pid: %d\n", channelInfo.audioPid);
     	            printf("Video pid: %d\n", channelInfo.videoPid);
+	   	            printf("Teletext status: %d\n", channelInfo.hasTeletext);
     	            printf("**********************************************************\n");
 					//printf("Name:%s\n", eitTable[]->name);					
 					eitTableGet();
@@ -174,6 +175,7 @@ void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value)
 					osd->audioPid = channelInfo.audioPid;
 					osd->videoPid = channelInfo.videoPid;
 					osd->channelNumber = channelInfo.programNumber;
+					osd->hasTeletext = channelInfo.hasTeletext;
 					osd->draw = 1;
     	        }
 				break;

@@ -42,6 +42,7 @@ typedef struct _ChannelInfo
     int16_t programNumber;
     int16_t audioPid;
     int16_t videoPid;
+	int16_t hasTeletext;
 }ChannelInfo;
 
 /**

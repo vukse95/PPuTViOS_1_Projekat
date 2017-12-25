@@ -77,6 +77,7 @@ typedef struct _PmtElementaryInfo
     uint8_t streamType;
     uint16_t elementaryPid;
     uint16_t esInfoLength;
+	uint8_t teletext;
 }PmtElementaryInfo;
 
 /**

@@ -145,6 +145,7 @@ StreamControllerError getChannelInfo(ChannelInfo* channelInfo)
     channelInfo->programNumber = currentChannel.programNumber;
     channelInfo->audioPid = currentChannel.audioPid;
     channelInfo->videoPid = currentChannel.videoPid;
+	channelInfo->hasTeletext = currentChannel.hasTeletext;
     
     return SC_NO_ERROR;
 }
@@ -176,9 +177,6 @@ void startChannel(int32_t channelNumber)
 
 	printf("\nParsed PMT table!\n");
 
-	/* EIT table parsing */
-		
-
 	/* free PMT table filter */
 	Demux_Free_Filter(playerHandle, filterHandle);
     
@@ -195,7 +193,7 @@ void startChannel(int32_t channelNumber)
 	*/
 	printf("\nParsed EIT table!\n");
     
-    /* get audio and video pids */
+    /* Get audio and video pids */
     int16_t audioPid = -1;
     int16_t videoPid = -1;
     uint8_t i = 0;
@@ -211,6 +209,12 @@ void startChannel(int32_t channelNumber)
         {
             audioPid = pmtTable->pmtElementaryInfoArray[i].elementaryPid;
         }
+		
+		/* Check for teletext */
+		if(pmtTable->pmtElementaryInfoArray[i].teletext == 1)
+		{
+			currentChannel.hasTeletext = 1;
+		}
     }
 
     if (videoPid != -1) 
@@ -252,6 +256,7 @@ void startChannel(int32_t channelNumber)
     currentChannel.audioPid = audioPid;
     currentChannel.videoPid = videoPid;
 
+	/* EIT table parsing */
 	/* set demux filter for receive EIT  actual TS present/following table of program */
 	if(Demux_Set_Filter(playerHandle, 0x0012, 0x4E, &filterHandle))
 	{

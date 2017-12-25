@@ -227,6 +227,24 @@ ParseErrorCode parsePmtElementaryInfo(const uint8_t* pmtElementaryInfoBuffer, Pm
     all16Bits = (uint16_t) ((higher8Bits << 8) + lower8Bits);
     pmtElementaryInfo->esInfoLength = all16Bits & 0x0FFF;
 
+	const uint8_t* teletextPointer = (pmtElementaryInfoBuffer + 5);
+	uint8_t teletextTag = *teletextPointer;
+
+	while(teletextPointer < pmtElementaryInfoBuffer + 5 + pmtElementaryInfo->esInfoLength)
+	{
+		teletextTag = *teletextPointer;
+		if(teletextTag == 0x56)
+		{
+			pmtElementaryInfo->teletext = 1;
+		}
+		else
+		{
+			pmtElementaryInfo->teletext = 0;
+		}
+		teletextPointer += 2 + *(teletextPointer + 1);
+	}
+	
+
     return TABLES_PARSE_OK;
 }
 
