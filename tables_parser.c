@@ -436,6 +436,7 @@ ParseErrorCode parseShortEventDescriptor(const uint8_t* shortEventDescriptorBuff
 				i++;
 			}
 			eitEventInfo->shortEventDescriptor.eventName[eitEventInfo->shortEventDescriptor.eventNameLength] = '\0';
+			//printf("\n\nEVENT NAME:%s\n", eitEventInfo->shortEventDescriptor.eventName);
 			return TABLES_PARSE_OK;
 		}
 		else if(shortEventDescriptorBuffer[parsedCount] == 0x54)

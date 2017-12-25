@@ -483,7 +483,7 @@ int32_t sectionReceivedCallback(uint8_t *buffer)
             //printEitTable(eitTable);
 			/* Punim strukturu */
 			
-			//eitBufferFilling(eitTable);
+			eitBufferFilling(eitTable);
 
 			/* Punim strukturu */
             pthread_mutex_lock(&demuxMutex);
@@ -556,8 +556,9 @@ void eitBufferFilling(EitTable* eitTableElement)
 	 	//printf("Vrednost za programNumber u petlji je: %d\n",eitBuffer[i].programNumber);		
 		if(eitBuffer[i].programNumber == eitTable->eitHeader.serviceId)
 		{
+			if(eitTable->eitEventInfoArray[0].runningStatus == 4)
+			strcpy(eitBuffer[i].name, eitTable->eitEventInfoArray[0].shortEventDescriptor.eventName);
 			
-			//strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
 			/* TODO: URADI ZA ZANAR!! */
 			infoFound = 1;
 			break;
@@ -570,7 +571,7 @@ void eitBufferFilling(EitTable* eitTableElement)
 			if(eitBuffer[i].programNumber == 0)
 			{
 				eitBuffer[i].programNumber = eitTable->eitHeader.serviceId;
-				//strcpy(eitBuffer[i].name, eitTable->eitServiceInfoArray[0].eitDescriptor.eventNameChar);
+				strcpy(eitBuffer[i].name, eitTable->eitEventInfoArray[0].shortEventDescriptor.eventName);
 				/* TODO: URADI ZA ZANAR!! */
 				break;
 			}

@@ -428,7 +428,7 @@ void timeOutChannelTrigger()
 	{
 		convertedKey = getNumberOfChannels();
 	}
-	printf("\nUnet broj:%d\n", convertedKey);
+	printf("\nRemote controller key input choise:%d\n", convertedKey);
 	fflush(stdout);
 	changeChannelExtern(convertedKey);
 
