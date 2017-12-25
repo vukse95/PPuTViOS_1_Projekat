@@ -185,10 +185,10 @@ void* OSDTask(void* params)
             }
 
             /* draw channel rectangle */
-            DFBCHECK(primary->SetColor(primary, 0x03, 0x03, 0xff, 0xff));
+            DFBCHECK(primary->SetColor(primary, 0x00, 0x8c, 0x44, 0xff));
             DFBCHECK(primary->FillRectangle(primary, 0, 0, screenWidth / 10, screenHeight / 8));
 
-            DFBCHECK(primary->SetColor(primary, 0x03, 0xff, 0x03, 0xff));
+            DFBCHECK(primary->SetColor(primary, 0x00, 0xa6, 0x51, 0xff));
             DFBCHECK(primary->FillRectangle(primary, 10, 10, screenWidth / 10 - 20, screenHeight / 8 - 20));
 
             /* draw channel number */
@@ -196,12 +196,12 @@ void* OSDTask(void* params)
             fontDesc.height = 48;
             sprintf(channelString, "%d", OsdInfo.channelNumber);
             DFBCHECK(dfbInterface->CreateFont(dfbInterface, "/home/galois/fonts/DejaVuSans.ttf", &fontDesc, &fontInterface));
-            DFBCHECK(primary->SetColor(primary, 0xff, 0x03, 0x03, 0xff));
+            DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff));
             DFBCHECK(primary->SetFont(primary, fontInterface));
             DFBCHECK(primary->DrawString(primary, channelString, -1, screenWidth / 10 - 110, screenHeight / 8 - 50, DSTF_LEFT));
 
             /* draw info rectangle */
-            DFBCHECK(primary->SetColor(primary, 0x03, 0x03, 0xff, 0xff));
+            DFBCHECK(primary->SetColor(primary, 0x00, 0xa6, 0x51, 0xff));
             DFBCHECK(primary->FillRectangle(primary, screenWidth / 2 - 500, screenHeight * 6 / 8, 1000, screenHeight / 8));
 
             /* draw audio and video pid */
@@ -209,7 +209,7 @@ void* OSDTask(void* params)
             sprintf(videoPidString, "Video PID: %d", OsdInfo.videoPid);
             fontDesc.height = 28;
             DFBCHECK(dfbInterface->CreateFont(dfbInterface, "/home/galois/fonts/DejaVuSans.ttf", &fontDesc, &fontInterface));
-            DFBCHECK(primary->SetColor(primary, 0xff, 0x03, 0x03, 0xff));
+            DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff));
             DFBCHECK(primary->DrawString(primary, audioPidString, -1, screenWidth / 2 - 470, screenHeight * 6 / 8 + 50, DSTF_LEFT));
             DFBCHECK(primary->DrawString(primary, videoPidString, -1, screenWidth / 2 - 470, screenHeight * 6 / 8 + 100, DSTF_LEFT));            
 
@@ -226,12 +226,12 @@ void* OSDTask(void* params)
             if (strlen(OsdInfo.eventName) > 1 && strlen(OsdInfo.eventGenre) > 1)
             {
                 /* draw name and genre rectangle */
-                DFBCHECK(primary->SetColor(primary, 0x03, 0x03, 0xff, 0xff));
+                DFBCHECK(primary->SetColor(primary, 0x00, 0xa6, 0x51, 0xff));
                 DFBCHECK(primary->FillRectangle(primary, screenWidth / 2 - 500, screenHeight * 5 / 8, 1000, screenHeight / 8 - 20));
 
                 /* draw name and genre */
-                DFBCHECK(primary->SetColor(primary, 0xff, 0x03, 0x03, 0xff));
-                DFBCHECK(primary->DrawString(primary, OsdInfo.eventName, -1, screenWidth / 2 - 470, screenHeight * 5 / 8 + 50, DSTF_LEFT));
+                DFBCHECK(primary->SetColor(primary, 0x00, 0x00, 0x00, 0xff));
+                DFBCHECK(primary->DrawString(primary, OsdInfo.eventName+1, -1, screenWidth / 2 - 470, screenHeight * 5 / 8 + 50, DSTF_LEFT));
                 DFBCHECK(primary->DrawString(primary, OsdInfo.eventGenre, -1, screenWidth / 2 - 470, screenHeight * 5 / 8 + 100, DSTF_LEFT));
             }
         }

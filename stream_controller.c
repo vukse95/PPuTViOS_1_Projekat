@@ -537,8 +537,8 @@ eitBufferElement* eitTableGet()
 		if(eitBuffer[i].programNumber == patTable->patServiceInfoArray[currentChannel.programNumber].programNumber)
 		{
 			/* Nasao koji info treba da se prosledi */
-			printf("\n\nNumber:%d\n", eitBuffer[i].programNumber);
-			printf("\n\nName:%s", eitBuffer[i].name);
+			//printf("\n\nNumber:%d\n", eitBuffer[i].programNumber);
+			//printf("\n\nName:%s", eitBuffer[i].name);
 
 			/* Clean eventName and eventGenre buffers */
 			memset(eventName, '\0', sizeof(eventName));
