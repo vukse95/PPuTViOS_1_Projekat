@@ -446,7 +446,7 @@ void timeOutChannelTrigger()
 	{
 		convertedKey = getNumberOfChannels();
 	}
-	printf("\nRemote controller key input choise:%d\n", convertedKey);
+	printf("\nRemote controller key input choice:%d\n", convertedKey);
 	fflush(stdout);
 	changeChannelExtern(convertedKey);
 
@@ -467,7 +467,7 @@ void registerProgramType(int16_t type)
 	OsdGraphicsInfo* osd = getOsdInfo();
 	if (type == -1)
 	{
-		printf("NASAO RADIO!");
+		//printf("Radio stream found!");
 		osd->drawBlack = 1;
 		osd->drawRadio = 1;
 	}
@@ -475,7 +475,7 @@ void registerProgramType(int16_t type)
 	{
 		osd->drawBlack = 0;
 		osd->drawRadio = 0;
-		printf("NEMA RADIA!");
+		//printf("Radio stream not found");
 	}
 }
 
