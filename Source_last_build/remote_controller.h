@@ -40,15 +40,15 @@
  */
 typedef enum _RemoteControllerError
 {
-	RC_NO_ERROR = 0,
-	RC_ERROR,
-	RC_THREAD_ERROR
+    RC_NO_ERROR = 0,
+    RC_ERROR,
+    RC_THREAD_ERROR
 }RemoteControllerError;
 
 /**
  * @brief Remote controller callback
  */
-typedef void (*RemoteControllerCallback)(uint16_t code, uint16_t type, uint32_t value);
+typedef void(*RemoteControllerCallback)(uint16_t code, uint16_t type, uint32_t value);
 
 /*
  * @brief Initializes remote controller module
