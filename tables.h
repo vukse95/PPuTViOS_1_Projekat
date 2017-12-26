@@ -7,7 +7,7 @@
 
 #define TABLES_MAX_NUMBER_OF_PIDS_IN_PAT    20      /* Max number of PMT pids in one PAT table */
 #define TABLES_MAX_NUMBER_OF_ELEMENTARY_PID 20      /* Max number of elementary pids in one PMT table */
-#define TABLES_MAX_NUMBER_OF_EVENTS_IN_EIT  20          /* Max number of events info in EIT table */
+#define TABLES_MAX_NUMBER_OF_EVENTS_IN_EIT  20      /* Max number of events info in EIT table */
 
 /**
  * @brief Enumeration of possible tables parser error codes
@@ -15,7 +15,7 @@
 typedef enum _ParseErrorCode
 {
 	TABLES_PARSE_ERROR = 0,                     /* TABLES_PARSE_ERROR */
-	TABLES_PARSE_OK = 1                             /* TABLES_PARSE_OK */
+	TABLES_PARSE_OK = 1                         /* TABLES_PARSE_OK */
 }ParseErrorCode;
 
 /**
@@ -47,9 +47,9 @@ typedef struct _PatServiceInfo
  */
 typedef struct _PatTable
 {
-	PatHeader patHeader;                                                 /* PAT Table Header */
+	PatHeader patHeader;                                                  /* PAT Table Header */
 	PatServiceInfo patServiceInfoArray[TABLES_MAX_NUMBER_OF_PIDS_IN_PAT]; /* Services info presented in PAT table */
-	uint8_t serviceInfoCount;                                            /* Number of services info presented in PAT table */
+	uint8_t serviceInfoCount;                                             /* Number of services info presented in PAT table */
 }PatTable;
 
 /**

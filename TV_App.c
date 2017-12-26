@@ -14,15 +14,15 @@ static inline void textColor(int32_t attr, int32_t fg, int32_t bg)
 }
 
 /* macro function for error checking */
-#define ERRORCHECK(x)                                                       \
-	{                                                                           \
-		if (x != 0)                                                                 \
-		{                                                                          \
-			textColor(1,1,0);                                                       \
-			printf(" Error!\n File: %s \t Line: <%d>\n", __FILE__, __LINE__);       \
-			textColor(0,7,0);                                                       \
-			return -1;                                                              \
-		}                                                                          \
+#define ERRORCHECK(x)                                                      			 \
+	{                                                                         		 \
+		if (x != 0)                                                                  \
+		{                                                                          	 \
+			textColor(1,1,0);                                                        \
+			printf(" Error!\n File: %s \t Line: <%d>\n", __FILE__, __LINE__);        \
+			textColor(0,7,0);                                                        \
+			return -1;                                                               \
+		}                                                                            \
 	}
 
 static void remoteControllerCallback(uint16_t code, uint16_t type, uint32_t value);
